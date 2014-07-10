@@ -16,10 +16,9 @@
 package br.com.anteros.spring;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 import javax.sql.DataSource;
-
-import org.springframework.jdbc.datasource.DataSourceUtils;
 
 import br.com.anteros.persistence.metadata.EntityCacheManager;
 import br.com.anteros.persistence.session.AbstractSQLSessionFactory;
@@ -27,10 +26,12 @@ import br.com.anteros.persistence.session.SQLSession;
 import br.com.anteros.persistence.session.configuration.SessionFactoryConfiguration;
 import br.com.anteros.persistence.session.impl.SQLQueryRunner;
 import br.com.anteros.persistence.session.impl.SQLSessionImpl;
+import br.com.anteros.persistence.util.ConnectionUtils;
 
 public class SpringSQLSessionFactoryImpl extends AbstractSQLSessionFactory {
 
-	public SpringSQLSessionFactoryImpl(EntityCacheManager entityCacheManager, DataSource dataSource, SessionFactoryConfiguration configuration)
+	public SpringSQLSessionFactoryImpl(EntityCacheManager entityCacheManager, DataSource dataSource,
+			SessionFactoryConfiguration configuration)
 			throws Exception {
 		super(entityCacheManager, dataSource, configuration);
 	}
@@ -39,21 +40,11 @@ public class SpringSQLSessionFactoryImpl extends AbstractSQLSessionFactory {
 	public SQLSession getSession() throws Exception {
 		if (localSession.get() == null) {
 			// Ler properties da connection
-			localSession.set(new SQLSessionImpl(this, this.getDatasource().getConnection(), this.getEntityCacheManager(), new SQLQueryRunner(), this
-					.getDialect(), this.isShowSql(), this.isFormatSql()));
+			localSession.set(new SQLSessionImpl(this, this.getDatasource().getConnection(), this
+					.getEntityCacheManager(), new SQLQueryRunner(),
+					this.getDialect(), this.isShowSql(), this.isFormatSql(), this.getQueryTimeout()));
 		}
 		return localSession.get();
-	}
-
-	@Override
-	public Connection getCurrentConnection() throws Exception {
-		return DataSourceUtils.getConnection(this.getDatasource());
-	}
-
-	@Override
-	public SQLSession getNewSession() throws Exception {
-		return new SQLSessionImpl(this, this.getDatasource().getConnection(), this.getEntityCacheManager(), new SQLQueryRunner(), this.getDialect(),
-				this.isShowSql(), this.isFormatSql());
 	}
 
 	@Override
@@ -64,6 +55,18 @@ public class SpringSQLSessionFactoryImpl extends AbstractSQLSessionFactory {
 	@Override
 	public void afterGenerateDDL() throws Exception {
 
+	}
+
+	@Override
+	public Connection validateConnection(Connection conn) throws SQLException {
+		if (conn != null && conn.isClosed()) {
+			ConnectionUtils.releaseConnection(this.getDatasource());
+			conn = null;
+		}
+		if (conn == null) {
+			conn = ConnectionUtils.getConnection(this.getDatasource());
+		}
+		return conn;
 	}
 
 }
