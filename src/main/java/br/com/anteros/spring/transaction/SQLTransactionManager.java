@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package br.com.anteros.spring;
+package br.com.anteros.spring.transaction;
 
 import java.sql.Connection;
 
 import javax.sql.DataSource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -33,14 +31,18 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.ResourceTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import br.com.anteros.persistence.log.Logger;
+import br.com.anteros.persistence.log.LoggerProvider;
 import br.com.anteros.persistence.session.AbstractSQLSessionFactory;
 
 public class SQLTransactionManager extends AbstractPlatformTransactionManager implements ResourceTransactionManager,
 		InitializingBean {
 
-	private static Logger log = LoggerFactory.getLogger(SQLTransactionManager.class);
+	private static final Logger log = LoggerProvider.getInstance().getLogger(
+			SQLTransactionManager.class.getName());
 
 	private DataSource dataSource;
+
 	private AbstractSQLSessionFactory sessionFactory;
 
 	public SQLTransactionManager() {

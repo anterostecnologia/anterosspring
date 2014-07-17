@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package br.com.anteros.spring;
+package br.com.anteros.spring.transaction;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,7 +24,6 @@ public class SpringSQLSessionFactoryBean extends AbstractSQLSessionFactoryBean {
 	protected void buildSessionFactory() throws Exception {
 		SpringSQLConfiguration configuration = new SpringSQLConfiguration(this.getDataSource());
 		List<Class> result = Arrays.asList(getAnnotatedClasses());
-
 		for (Class<?> sourceClass : result) {
 			configuration.addAnnotatedClass(sourceClass);
 		}

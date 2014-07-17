@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package br.com.anteros.spring;
+package br.com.anteros.spring.transaction;
 
 import java.util.Properties;
 
@@ -24,37 +24,33 @@ import org.springframework.beans.factory.InitializingBean;
 
 import br.com.anteros.persistence.session.SQLSessionFactory;
 
-public abstract class AbstractSQLSessionFactoryBean implements FactoryBean, InitializingBean{
+public abstract class AbstractSQLSessionFactoryBean implements FactoryBean, InitializingBean {
 
 	protected SQLSessionFactory sessionFactory;
 	protected Class<?>[] annotatedClasses;
 	protected Properties properties;
 	protected DataSource dataSource;
-	
+
 	public void setAnnotatedClasses(Class<?>[] annotatedClasses) {
 		this.annotatedClasses = annotatedClasses;
 	}
 
-	@Override
 	public void afterPropertiesSet() throws Exception {
 		buildSessionFactory();
 	}
 
-	@Override
 	public Object getObject() throws Exception {
 		return sessionFactory;
 	}
 
-	@Override
 	public Class getObjectType() {
 		return (this.sessionFactory != null ? this.sessionFactory.getClass() : SQLSessionFactory.class);
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return false;
 	}
-	
+
 	public void setProperties(Properties properties) {
 		this.properties = properties;
 	}
@@ -65,7 +61,7 @@ public abstract class AbstractSQLSessionFactoryBean implements FactoryBean, Init
 		}
 		return this.properties;
 	}
-	
+
 	protected abstract void buildSessionFactory() throws Exception;
 
 	public DataSource getDataSource() {

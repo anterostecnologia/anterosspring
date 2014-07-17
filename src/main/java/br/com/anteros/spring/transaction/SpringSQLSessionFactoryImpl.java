@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package br.com.anteros.spring;
+package br.com.anteros.spring.transaction;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -38,13 +38,15 @@ public class SpringSQLSessionFactoryImpl extends AbstractSQLSessionFactory {
 
 	@Override
 	public SQLSession getSession() throws Exception {
-		if (localSession.get() == null) {
+		SQLSession session = existingSession(this);
+		if (session == null) {
 			// Ler properties da connection
-			localSession.set(new SQLSessionImpl(this, this.getDatasource().getConnection(), this
-					.getEntityCacheManager(), new SQLQueryRunner(),
-					this.getDialect(), this.isShowSql(), this.isFormatSql(), this.getQueryTimeout()));
+			session = new SQLSessionImpl(this, this.getDatasource().getConnection(), this.getEntityCacheManager(),
+					new SQLQueryRunner(), this.getDialect(), this.isShowSql(), this.isFormatSql(),
+					this.getQueryTimeout());
+			doBind(session, this);
 		}
-		return localSession.get();
+		return session;
 	}
 
 	@Override
@@ -57,14 +59,23 @@ public class SpringSQLSessionFactoryImpl extends AbstractSQLSessionFactory {
 
 	}
 
-	@Override
 	public Connection validateConnection(Connection conn) throws SQLException {
-		if (conn != null && conn.isClosed()) {
-			ConnectionUtils.releaseConnection(this.getDatasource());
-			conn = null;
+		if (conn != null) {
+			// primeiro tenta usar o método isValid, porém nem todos os JDBC
+			// implementam este método
+			try {
+				if (!conn.isValid(0)) {
+					conn = null;
+				}
+			} catch (AbstractMethodError ex) {
+				// se der alguma exceção no isValid usa o isClosed
+				if (conn.isClosed()) {
+					conn = null;
+				}
+			}
 		}
 		if (conn == null) {
-			conn = ConnectionUtils.getConnection(this.getDatasource());
+			conn = this.getDatasource().getConnection();
 		}
 		return conn;
 	}
