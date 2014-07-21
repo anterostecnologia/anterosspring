@@ -1,14 +1,21 @@
 package br.com.anteros.spring.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import br.com.anteros.persistence.session.SQLSessionFactory;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.context.request.WebRequest;
 
 /**
  * 
@@ -19,13 +26,7 @@ import br.com.anteros.persistence.session.SQLSessionFactory;
  *
  */
 @RestController
-@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED, readOnly = true)
 public abstract class AbstractRestSQLService<T> extends AbstractTransactionSQLService<T> {
-
-	@Autowired
-	public AbstractRestSQLService(SQLSessionFactory sqlSessionFactory) {
-		super(sqlSessionFactory);
-	}
 
 	/**
 	 * Insert or Update object in database via POST or PUT methods;
@@ -35,8 +36,8 @@ public abstract class AbstractRestSQLService<T> extends AbstractTransactionSQLSe
 	 * @throws Exception
 	 */
 	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED, readOnly = false)
-	@RequestMapping(value = "/{id}", method = { RequestMethod.POST, RequestMethod.PUT })
-	public abstract T save(@PathVariable(value = "id") String... id) throws Exception;
+	@RequestMapping(value = "/", method = { RequestMethod.POST, RequestMethod.PUT })
+	public abstract T save(HttpServletRequest request, HttpServletResponse response, @RequestBody T object) throws Exception;
 
 	/**
 	 * Remove object in database via DELETE method
@@ -47,7 +48,7 @@ public abstract class AbstractRestSQLService<T> extends AbstractTransactionSQLSe
 	 */
 	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED, readOnly = false)
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-	public abstract T remove(@PathVariable(value = "id") String... id) throws Exception;
+	public abstract T remove(HttpServletRequest request, HttpServletResponse response, @PathVariable(value = "id") String... id) throws Exception;
 
 	/**
 	 * Get object in database via GET method
@@ -57,6 +58,24 @@ public abstract class AbstractRestSQLService<T> extends AbstractTransactionSQLSe
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
-	public abstract T get(@PathVariable(value = "id") String... id) throws Exception;
+	public abstract T get(HttpServletRequest request, HttpServletResponse response, @PathVariable(value = "id") String... id) throws Exception;
+
+	/**
+	 * Método para tratamento de exceções ocorridas durante a requisição REST.
+	 * 
+	 * @param ex
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws IOException
+	 */
+	@ExceptionHandler(HttpClientErrorException.class)
+	public @ResponseBody String handleUncaughtException(HttpClientErrorException ex, WebRequest request,
+			HttpServletResponse response)
+			throws IOException {
+		response.sendError(ex.getStatusCode().value(), ex.getMessage());
+		ex.printStackTrace();
+		return ex.getMessage();
+	}
 
 }

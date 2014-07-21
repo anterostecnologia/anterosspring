@@ -1,6 +1,9 @@
 package br.com.anteros.spring.service;
 
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+
+import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,22 +24,33 @@ import br.com.anteros.persistence.session.dao.SQLDao;
  *
  */
 @Service
-@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED, readOnly = true)
+@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
 public abstract class AbstractTransactionSQLService<T> extends AbstractSQLService<T> {
 
 	@Autowired
-	public AbstractTransactionSQLService(SQLSessionFactory sqlSessionFactory) {
-		super(sqlSessionFactory);
+	protected SQLSessionFactory sqlSessionFactory;
+
+	@PostConstruct
+	public void initDao() {
+		try {
+			// descobre automaticamente qual a classe do tipo T
+			Class<T> clazz = (Class<T>) ((ParameterizedType) this.getClass().getGenericSuperclass())
+					.getActualTypeArguments()[0];
+			dao = new SQLDao<T>(sqlSessionFactory.getSession(),
+					clazz);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
-	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED, readOnly = false)
+	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = false)
 	public void remove(T object) throws Exception {
 		super.remove(object);
 	}
 
 	@Override
-	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED, readOnly = false)
+	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = false)
 	public T save(T object) throws Exception {
 		return super.save(object);
 	}

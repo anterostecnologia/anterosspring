@@ -28,6 +28,10 @@ import br.com.anteros.persistence.session.impl.SQLQueryRunner;
 import br.com.anteros.persistence.session.impl.SQLSessionImpl;
 import br.com.anteros.persistence.util.ConnectionUtils;
 
+/**
+ * Implementação de SessionFactory. Factory fornecedora de SQLSessions.
+ * 
+ */
 public class SpringSQLSessionFactoryImpl extends AbstractSQLSessionFactory {
 
 	public SpringSQLSessionFactoryImpl(EntityCacheManager entityCacheManager, DataSource dataSource,
@@ -41,10 +45,9 @@ public class SpringSQLSessionFactoryImpl extends AbstractSQLSessionFactory {
 		SQLSession session = existingSession(this);
 		if (session == null) {
 			// Ler properties da connection
-			session = new SQLSessionImpl(this, this.getDatasource().getConnection(), this.getEntityCacheManager(),
-					new SQLQueryRunner(), this.getDialect(), this.isShowSql(), this.isFormatSql(),
-					this.getQueryTimeout());
+			session = openSession();
 			doBind(session, this);
+			System.out.println("Criou SQLSession " + session);
 		}
 		return session;
 	}
@@ -59,25 +62,12 @@ public class SpringSQLSessionFactoryImpl extends AbstractSQLSessionFactory {
 
 	}
 
-	public Connection validateConnection(Connection conn) throws SQLException {
-		if (conn != null) {
-			// primeiro tenta usar o método isValid, porém nem todos os JDBC
-			// implementam este método
-			try {
-				if (!conn.isValid(0)) {
-					conn = null;
-				}
-			} catch (AbstractMethodError ex) {
-				// se der alguma exceção no isValid usa o isClosed
-				if (conn.isClosed()) {
-					conn = null;
-				}
-			}
-		}
-		if (conn == null) {
-			conn = this.getDatasource().getConnection();
-		}
-		return conn;
+	public SQLSession openSession() throws Exception {
+		Connection connection = this.getDatasource().getConnection();
+		setConfigurationClientInfo(connection);
+		return new SQLSessionImpl(this, connection, this.getEntityCacheManager(),
+				new SQLQueryRunner(), this.getDialect(), this.isShowSql(), this.isFormatSql(),
+				this.getQueryTimeout());
 	}
 
 }
