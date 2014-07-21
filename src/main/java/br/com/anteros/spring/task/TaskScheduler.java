@@ -2,13 +2,10 @@ package br.com.anteros.spring.task;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.anteros.persistence.session.SQLSessionFactory;
-import br.com.anteros.spring.service.AbstractTransactionSQLService;
 
 /**
  * 
@@ -21,7 +18,7 @@ import br.com.anteros.spring.service.AbstractTransactionSQLService;
 @EnableScheduling
 @Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
 public abstract class TaskScheduler {
-	
+
 	@Autowired
 	protected SQLSessionFactory sqlSessionFactory;
 
