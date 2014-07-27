@@ -36,7 +36,7 @@ public abstract class AbstractTransactionSQLService<T> extends AbstractSQLServic
 			// descobre automaticamente qual a classe do tipo T
 			Class<T> clazz = (Class<T>) ((ParameterizedType) this.getClass().getGenericSuperclass())
 					.getActualTypeArguments()[0];
-			dao = new SQLDao<T>(sqlSessionFactory.getSession(),
+			dao = new SQLDao<T>(sqlSessionFactory,
 					clazz);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
