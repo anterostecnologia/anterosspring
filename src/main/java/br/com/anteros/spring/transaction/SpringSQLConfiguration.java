@@ -17,13 +17,13 @@ package br.com.anteros.spring.transaction;
 
 import javax.sql.DataSource;
 
+import br.com.anteros.core.configuration.exception.AnterosConfigurationException;
+import br.com.anteros.core.utils.ResourceUtils;
 import br.com.anteros.persistence.metadata.configuration.ModelConfiguration;
 import br.com.anteros.persistence.session.SQLSessionFactory;
-import br.com.anteros.persistence.session.configuration.AnterosConfiguration;
-import br.com.anteros.persistence.session.configuration.exception.AnterosConfigurationException;
-import br.com.anteros.persistence.util.ResourceUtils;
+import br.com.anteros.persistence.session.configuration.AnterosPersistenceConfiguration;
 
-public class SpringSQLConfiguration extends AnterosConfiguration {
+public class SpringSQLConfiguration extends AnterosPersistenceConfiguration {
 
 	public SpringSQLConfiguration(DataSource dataSource) {
 		super(dataSource);
