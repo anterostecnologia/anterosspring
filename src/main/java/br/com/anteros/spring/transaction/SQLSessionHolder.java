@@ -1,19 +1,3 @@
-/*
- * Copyright 2002-2012 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package br.com.anteros.spring.transaction;
 
 import java.util.Map;
@@ -39,53 +23,53 @@ public class SQLSessionHolder extends ResourceHolderSupport {
 
 
 	public SQLSessionHolder(SQLSession session) {
-		addSession(session);
+		addSQLSession(session);
 	}
 
 	public SQLSessionHolder(Object key, SQLSession session) {
-		addSession(key, session);
+		addSQLSession(key, session);
 	}
 
 
-	public SQLSession getSession() {
-		return getSession(DEFAULT_KEY);
+	public SQLSession getSQLSession() {
+		return getSQLSession(DEFAULT_KEY);
 	}
 
-	public SQLSession getSession(Object key) {
+	public SQLSession getSQLSession(Object key) {
 		return this.sessionMap.get(key);
 	}
 
-	public SQLSession getValidatedSession() {
-		return getValidatedSession(DEFAULT_KEY);
+	public SQLSession getValidatedSQLSession() {
+		return getValidatedSQLSession(DEFAULT_KEY);
 	}
 
-	public SQLSession getValidatedSession(Object key) {
+	public SQLSession getValidatedSQLSession(Object key) {
 		SQLSession session = this.sessionMap.get(key);
 		return session;
 	}
 
-	public SQLSession getAnySession() {
+	public SQLSession getAnySQLSession() {
 		if (!this.sessionMap.isEmpty()) {
 			return this.sessionMap.values().iterator().next();
 		}
 		return null;
 	}
 
-	public void addSession(SQLSession session) {
-		addSession(DEFAULT_KEY, session);
+	public void addSQLSession(SQLSession session) {
+		addSQLSession(DEFAULT_KEY, session);
 	}
 
-	public void addSession(Object key, SQLSession session) {
+	public void addSQLSession(Object key, SQLSession session) {
 		Assert.notNull(key, "Key must not be null");
 		Assert.notNull(session, "Session must not be null");
 		this.sessionMap.put(key, session);
 	}
 
-	public SQLSession removeSession(Object key) {
+	public SQLSession removeSQLSession(Object key) {
 		return this.sessionMap.remove(key);
 	}
 
-	public boolean containsSession(SQLSession session) {
+	public boolean containsSQLSession(SQLSession session) {
 		return this.sessionMap.containsValue(session);
 	}
 

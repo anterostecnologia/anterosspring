@@ -105,7 +105,7 @@ public abstract class SQLSessionFactoryUtils {
 				// Spring transaction management is active ->
 				// register pre-bound Session with it for transactional
 				// flushing.
-				session = sessionHolder.getValidatedSession();
+				session = sessionHolder.getValidatedSQLSession();
 				if (session != null && !sessionHolder.isSynchronizedWithTransaction()) {
 					logger.debug("Registering Spring transaction synchronization for existing Anteros SQLSession");
 					TransactionSynchronizationManager.registerSynchronization(new SpringSQLSessionSynchronization(
@@ -137,7 +137,7 @@ public abstract class SQLSessionFactoryUtils {
 			if (holderToUse == null) {
 				holderToUse = new SQLSessionHolder(session);
 			} else {
-				holderToUse.addSession(session);
+				holderToUse.addSQLSession(session);
 			}
 			TransactionSynchronizationManager.registerSynchronization(new SpringSQLSessionSynchronization(holderToUse,
 					sessionFactory, true));
@@ -170,7 +170,7 @@ public abstract class SQLSessionFactoryUtils {
 		// TransactionManagerLookup is specified
 		// in Anteros configuration, it will contain a TransactionManager
 		// reference.
-		TransactionManager jtaTm = getJtaTransactionManager(sessionFactory, sessionHolder.getAnySession());
+		TransactionManager jtaTm = getJtaTransactionManager(sessionFactory, sessionHolder.getAnySQLSession());
 		if (jtaTm != null) {
 			// Check whether JTA transaction management is active ->
 			// fetch pre-bound Session for the current JTA transaction, if any.
@@ -183,7 +183,7 @@ public abstract class SQLSessionFactoryUtils {
 				if (jtaTx != null) {
 					int jtaStatus = jtaTx.getStatus();
 					if (jtaStatus == Status.STATUS_ACTIVE || jtaStatus == Status.STATUS_MARKED_ROLLBACK) {
-						SQLSession session = sessionHolder.getValidatedSession(jtaTx);
+						SQLSession session = sessionHolder.getValidatedSQLSession(jtaTx);
 						if (session == null && !sessionHolder.isSynchronizedWithTransaction()) {
 							// No transaction-specific Session found: If not
 							// already marked as
@@ -195,10 +195,10 @@ public abstract class SQLSessionFactoryUtils {
 							// one being suspended:
 							// In that case, we'll return null to trigger
 							// opening of a new Session.
-							session = sessionHolder.getValidatedSession();
+							session = sessionHolder.getValidatedSQLSession();
 							if (session != null) {
 								logger.debug("Registering JTA transaction synchronization for existing Anteros SQLSession");
-								sessionHolder.addSession(jtaTx, session);
+								sessionHolder.addSQLSession(jtaTx, session);
 								jtaTx.registerSynchronization(new SpringJtaSynchronizationAdapter(
 										new SpringSQLSessionSynchronization(sessionHolder, sessionFactory,
 												false), jtaTm));
@@ -211,7 +211,7 @@ public abstract class SQLSessionFactoryUtils {
 				// No transaction active -> simply return default thread-bound
 				// Session, if any
 				// (possibly from OpenSessionInViewFilter/Interceptor).
-				return sessionHolder.getValidatedSession();
+				return sessionHolder.getValidatedSQLSession();
 			} catch (Throwable ex) {
 				throw new DataAccessResourceFailureException("Could not check JTA transaction", ex);
 			}
@@ -219,7 +219,7 @@ public abstract class SQLSessionFactoryUtils {
 			// No JTA TransactionManager -> simply return default thread-bound
 			// Session, if any
 			// (possibly from OpenSessionInViewFilter/Interceptor).
-			return sessionHolder.getValidatedSession();
+			return sessionHolder.getValidatedSQLSession();
 		}
 	}
 
@@ -246,7 +246,7 @@ public abstract class SQLSessionFactoryUtils {
 						if (holderToUse == null) {
 							holderToUse = new SQLSessionHolder(jtaTx, session);
 						} else {
-							holderToUse.addSession(jtaTx, session);
+							holderToUse.addSQLSession(jtaTx, session);
 						}
 						jtaTx.registerSynchronization(new SpringJtaSynchronizationAdapter(
 								new SpringSQLSessionSynchronization(holderToUse, sessionFactory, 
@@ -276,7 +276,7 @@ public abstract class SQLSessionFactoryUtils {
 			SQLSessionHolder sessionHolder = (SQLSessionHolder) TransactionSynchronizationManager
 					.getResource(sessionFactory);
 			if (sessionHolder != null && !sessionHolder.isEmpty()) {
-				return sessionFactory.openSession(sessionHolder.getAnySession().getConnection());
+				return sessionFactory.openSession(sessionHolder.getAnySQLSession().getConnection());
 			} else {
 
 				return sessionFactory.openSession();
@@ -303,7 +303,7 @@ public abstract class SQLSessionFactoryUtils {
 			return false;
 		}
 		SQLSessionHolder sessionHolder = (SQLSessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
-		return (sessionHolder != null && sessionHolder.containsSession(session));
+		return (sessionHolder != null && sessionHolder.containsSQLSession(session));
 	}
 
 	public static boolean isDeferredCloseActive(SQLSessionFactory sessionFactory) {

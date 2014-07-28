@@ -56,7 +56,7 @@ class SpringSQLSessionSynchronization implements TransactionSynchronization, Ord
 		// Check whether the SessionFactory has a JTA TransactionManager.
 		TransactionManager jtaTm;
 		try {
-			jtaTm = SQLSessionFactoryUtils.getJtaTransactionManager(sessionFactory, sQLSessionHolder.getAnySession());
+			jtaTm = SQLSessionFactoryUtils.getJtaTransactionManager(sessionFactory, sQLSessionHolder.getAnySQLSession());
 		} catch (Exception ex) {
 			throw new DataAccessResourceFailureException("Could not access JTA transaction", ex);
 		}
@@ -79,10 +79,10 @@ class SpringSQLSessionSynchronization implements TransactionSynchronization, Ord
 	private SQLSession getCurrentSession() {
 		SQLSession session = null;
 		if (this.jtaTransaction != null) {
-			session = this.sQLSessionHolder.getSession(this.jtaTransaction);
+			session = this.sQLSessionHolder.getSQLSession(this.jtaTransaction);
 		}
 		if (session == null) {
-			session = this.sQLSessionHolder.getSession();
+			session = this.sQLSessionHolder.getSQLSession();
 		}
 		return session;
 	}
@@ -97,7 +97,6 @@ class SpringSQLSessionSynchronization implements TransactionSynchronization, Ord
 	public void suspend() {
 		if (this.holderActive) {
 			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
-			// Eagerly disconnect the Session here, to make release mode "on_close" work on JBoss.
 			try {
 				getCurrentSession().close();
 			} catch (Exception e) {
@@ -136,7 +135,7 @@ class SpringSQLSessionSynchronization implements TransactionSynchronization, Ord
 		if (this.jtaTransaction != null) {
 			// Typically in case of a suspended JTA transaction:
 			// Remove the Session for the current JTA transaction, but keep the holder.
-			SQLSession session = this.sQLSessionHolder.removeSession(this.jtaTransaction);
+			SQLSession session = this.sQLSessionHolder.removeSQLSession(this.jtaTransaction);
 			if (session != null) {
 				if (this.sQLSessionHolder.isEmpty()) {
 					// No Sessions for JTA transactions bound anymore -> could remove it.
@@ -145,7 +144,7 @@ class SpringSQLSessionSynchronization implements TransactionSynchronization, Ord
 				}
 				// Do not close a pre-bound Session. In that case, we'll find the
 				// transaction-specific Session the same as the default Session.
-				if (session != this.sQLSessionHolder.getSession()) {
+				if (session != this.sQLSessionHolder.getSQLSession()) {
 					SQLSessionFactoryUtils.closeSessionOrRegisterDeferredClose(session, this.sessionFactory);
 				}
 				else {
@@ -169,11 +168,11 @@ class SpringSQLSessionSynchronization implements TransactionSynchronization, Ord
 				// Anteros will automatically defer the actual closing until JTA transaction completion.
 				// Else, the Session will be closed in the afterCompletion method, to provide the
 				// correct transaction status for releasing the Session's cache locks.
-				SQLSessionFactoryUtils.closeSessionOrRegisterDeferredClose(this.sQLSessionHolder.getSession(), this.sessionFactory);
+				SQLSessionFactoryUtils.closeSessionOrRegisterDeferredClose(this.sQLSessionHolder.getSQLSession(), this.sessionFactory);
 			}
 		}
 		else  {
-			SQLSession session = this.sQLSessionHolder.getSession();
+			SQLSession session = this.sQLSessionHolder.getSQLSession();
 			if (this.transactionCompletion) {
 				// Eagerly disconnect the Session here, to make release mode "on_close" work nicely.
 				// We know that this is appropriate if a TransactionManagerLookup has been specified.
@@ -197,7 +196,7 @@ class SpringSQLSessionSynchronization implements TransactionSynchronization, Ord
 				// No Anteros TransactionManagerLookup: apply afterTransactionCompletion callback.
 				// Always perform explicit afterTransactionCompletion callback for pre-bound Session,
 				// even with Anteros TransactionManagerLookup (which only applies to new Sessions).
-				SQLSession session = this.sQLSessionHolder.getSession();
+				SQLSession session = this.sQLSessionHolder.getSQLSession();
 				// Provide correct transaction status for releasing the Session's cache locks,
 				// if possible. Else, closing will release all cache locks assuming a rollback.
 					// Close the Anteros SQLSession here if necessary
@@ -210,7 +209,7 @@ class SpringSQLSessionSynchronization implements TransactionSynchronization, Ord
 				// Clear all pending inserts/updates/deletes in the Session.
 				// Necessary for pre-bound Sessions, to avoid inconsistent state.
 				try {
-					this.sQLSessionHolder.getSession().clear();
+					this.sQLSessionHolder.getSQLSession().clear();
 				} catch (Exception e) {
 					new RuntimeException(e);
 				}

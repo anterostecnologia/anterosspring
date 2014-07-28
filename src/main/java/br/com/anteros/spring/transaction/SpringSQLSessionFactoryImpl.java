@@ -38,17 +38,16 @@ public class SpringSQLSessionFactoryImpl extends AbstractSQLSessionFactory {
 			SessionFactoryConfiguration configuration)
 			throws Exception {
 		super(entityCacheManager, dataSource, configuration);
-
-		configuration.addProperty(AnterosPersistenceProperties.CURRENT_SESSION_CONTEXT,
-				SpringSQLSessionContext.class.getName());
-
+		
+		configuration.addProperty(AnterosPersistenceProperties.CURRENT_SESSION_CONTEXT, SpringSQLSessionContext.class.getName());
+		
 		this.currentSessionContext = buildCurrentSessionContext();
 	}
 
 	@Override
 	public SQLSession getCurrentSession() throws Exception {
-		if (currentSessionContext == null) {
-			throw new SQLSessionException("No CurrentSessionContext configured!");
+		if ( currentSessionContext == null ) {
+			throw new SQLSessionException( "No CurrentSessionContext configured!" );
 		}
 		return currentSessionContext.currentSession();
 	}
@@ -66,7 +65,8 @@ public class SpringSQLSessionFactoryImpl extends AbstractSQLSessionFactory {
 	public SQLSession openSession() throws Exception {
 		return openSession(this.getDatasource().getConnection());
 	}
-
+	
+	
 	@Override
 	protected TransactionFactory getTransactionFactory() {
 		if (transactionFactory == null) {
@@ -108,27 +108,27 @@ public class SpringSQLSessionFactoryImpl extends AbstractSQLSessionFactory {
 			transactionManager = getTransactionManagerLookup().getTransactionManager();
 		return transactionManager;
 	}
-
+	
 	private CurrentSQLSessionContext buildCurrentSessionContext() throws Exception {
-		String impl = configuration.getProperty(AnterosPersistenceProperties.CURRENT_SESSION_CONTEXT);
-		if (impl == null && transactionManager != null) {
+		String impl = configuration.getProperty( AnterosPersistenceProperties.CURRENT_SESSION_CONTEXT );
+		if ( impl == null && transactionManager != null ) {
 			impl = "jta";
 		}
 
-		if (impl == null) {
+		if ( impl == null ) {
 			return null;
 		}
-		else if ("jta".equals(impl)) {
-			return new JTASQLSessionContext(this);
+		else if ( "jta".equals( impl ) ) {
+			return new JTASQLSessionContext( this );
 		}
-		else if ("thread".equals(impl)) {
-			return new ThreadLocalSQLSessionContext(this);
+		else if ( "thread".equals( impl ) ) {
+			return new ThreadLocalSQLSessionContext( this );
 		}
-		else if ("managed".equals(impl)) {
-			return new ManagedSQLSessionContext(this);
+		else if ( "managed".equals( impl ) ) {
+			return new ManagedSQLSessionContext( this );
 		}
 		else {
-			return new ThreadLocalSQLSessionContext(this);
+			return new ThreadLocalSQLSessionContext( this );
 		}
 	}
 
@@ -137,7 +137,7 @@ public class SpringSQLSessionFactoryImpl extends AbstractSQLSessionFactory {
 		setConfigurationClientInfo(connection);
 		return new SQLSessionImpl(this, connection, this.getEntityCacheManager(),
 				new SQLQueryRunner(), this.getDialect(), this.isShowSql(), this.isFormatSql(),
-				this.getQueryTimeout(), getTransactionFactory());
+				this.getQueryTimeout(),getTransactionFactory());
 	}
 
 }
