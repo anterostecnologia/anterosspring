@@ -70,7 +70,29 @@ public class SpringSQLSessionFactoryImpl extends AbstractSQLSessionFactory {
 	@Override
 	protected TransactionFactory getTransactionFactory() {
 		if (transactionFactory == null) {
-			transactionFactory = new JDBCTransactionFactory();
+			try {
+				transactionFactory = buildTransactionFactory();
+			} catch (Exception e) {
+				throw new TransactionException("Não foi possível criar a fábrica de transações.",e);
+			}
+		}
+		return transactionFactory;
+	}
+
+	protected TransactionFactory buildTransactionFactory() throws Exception {
+		if (transactionFactory == null) {
+			String tfLookupClass = configuration.getProperty(AnterosPersistenceProperties.TRANSACTION_FACTORY);
+			if (tfLookupClass == null) {
+				tfLookupClass = JDBCTransactionFactory.class.getName();
+			}
+			log.info("instantiating TransactionFactory: " + tfLookupClass);
+			try {
+				transactionFactory = (TransactionFactory) ReflectionUtils.classForName(tfLookupClass).newInstance();
+				log.info("instantiated TransactionFactory");
+			} catch (Exception e) {
+				log.error("Could not instantiate TransactionManagerLookup", e);
+				throw new TransactionException("Could not instantiate TransactionManagerLookup '" + tfLookupClass + "'");
+			}
 		}
 		return transactionFactory;
 	}

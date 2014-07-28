@@ -86,8 +86,8 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 		this.prepareConnection = prepareConnection;
 	}
 
-	public void setHibernateManagedSession(boolean hibernateManagedSession) {
-		this.managedSession = hibernateManagedSession;
+	public void setManagedSession(boolean managedSession) {
+		this.managedSession = managedSession;
 	}
 
 	public void setEarlyFlushBeforeCommit(boolean earlyFlushBeforeCommit) {
@@ -113,7 +113,7 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 			if (sfds != null) {
 				if (logger.isInfoEnabled()) {
 					logger.info("Using DataSource [" + sfds
-							+ "] of Hibernate SessionFactory for HibernateTransactionManager");
+							+ "] of Anteros SQLSessionFactory for AnterosTransactionManager");
 				}
 				setDataSource(sfds);
 			}
@@ -136,20 +136,20 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 			if (logger.isDebugEnabled()) {
 				logger.debug("Found thread-bound Session ["
 						+ SQLSessionFactoryUtils.toString(SQLSessionHolder.getSQLSession())
-						+ "] for Hibernate transaction");
+						+ "] for Anteros transaction");
 			}
 			txObject.setSQLSessionHolder(SQLSessionHolder);
 		} else if (this.managedSession) {
 			try {
 				SQLSession session = getSQLSessionFactory().getCurrentSession();
 				if (logger.isDebugEnabled()) {
-					logger.debug("Found Hibernate-managed Session [" + SQLSessionFactoryUtils.toString(session)
+					logger.debug("Found Anteros-managed Session [" + SQLSessionFactoryUtils.toString(session)
 							+ "] for Spring-managed transaction");
 				}
 				txObject.setExistingSession(session);
 			} catch (Exception ex) {
 				throw new DataAccessResourceFailureException(
-						"Could not obtain Hibernate-managed Session for Spring-managed transaction", ex);
+						"Could not obtain A-managed Session for Spring-managed transaction", ex);
 			}
 		}
 
@@ -179,10 +179,10 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 
 		if (txObject.hasConnectionHolder() && !txObject.getConnectionHolder().isSynchronizedWithTransaction()) {
 			throw new IllegalTransactionStateException(
-					"Pre-bound JDBC Connection found! HibernateTransactionManager does not support "
+					"Pre-bound JDBC Connection found! AnterosTransactionManager does not support "
 							+ "running within DataSourceTransactionManager if told to manage the DataSource itself. "
-							+ "It is recommended to use a single HibernateTransactionManager for all transactions "
-							+ "on a single DataSource, no matter whether Hibernate or JDBC access.");
+							+ "It is recommended to use a single AnterosTransactionManager for all transactions "
+							+ "on a single DataSource, no matter whether Anteros or JDBC access.");
 		}
 
 		SQLSession session = null;
@@ -193,7 +193,7 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 				SQLSession newSession = getSQLSessionFactory().openSession();
 				if (logger.isDebugEnabled()) {
 					logger.debug("Opened new Session [" + SQLSessionFactoryUtils.toString(newSession)
-							+ "] for Hibernate transaction");
+							+ "] for Anteros transaction");
 				}
 				txObject.setSession(newSession);
 			}
@@ -202,7 +202,7 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 
 			if (this.prepareConnection) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Preparing JDBC Connection of Hibernate Session ["
+					logger.debug("Preparing JDBC Connection of Anteros Session ["
 							+ SQLSessionFactoryUtils.toString(session) + "]");
 				}
 				Connection con = session.getConnection();
@@ -211,14 +211,14 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 			} else {
 				if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
 					throw new InvalidIsolationLevelException(
-							"HibernateTransactionManager is not allowed to support custom isolation levels: "
+							"AnterosTransactionManager is not allowed to support custom isolation levels: "
 									+ "make sure that its 'prepareConnection' flag is on (the default) and that the "
-									+ "Hibernate connection release mode is set to 'on_close' (SpringTransactionFactory's default). "
-									+ "Make sure that your LocalSessionFactoryBean actually uses SpringTransactionFactory: Your "
-									+ "Hibernate properties should *not* include a 'hibernate.transaction.factory_class' property!");
+									+ "Anteros connection release mode is set to 'on_close' (SpringTransactionFactory's default). "
+									+ "Make sure that your SpringSQLSessionFactoryBean actually uses JDBCTransactionFactory: Your "
+									+ "Anteros properties should *not* include a 'transaction-factory' property!");
 				}
 				if (logger.isDebugEnabled()) {
-					logger.debug("Not preparing JDBC Connection of Hibernate Session ["
+					logger.debug("Not preparing JDBC Connection of Anteros Session ["
 							+ SQLSessionFactoryUtils.toString(session) + "]");
 				}
 			}
@@ -232,7 +232,7 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 				Connection con = session.getConnection();
 				ConnectionHolder conHolder = new ConnectionHolder(con);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Exposing Hibernate transaction as JDBC transaction [" + con + "]");
+					logger.debug("Exposing Anteros transaction as JDBC transaction [" + con + "]");
 				}
 				TransactionSynchronizationManager.bindResource(getDataSource(), conHolder);
 				txObject.setConnectionHolder(conHolder);
@@ -256,7 +256,7 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 					SQLSessionFactoryUtils.closeSession(session);
 				}
 			}
-			throw new CannotCreateTransactionException("Could not open Hibernate Session for transaction", ex);
+			throw new CannotCreateTransactionException("Could not open Anteros Session for transaction", ex);
 		}
 	}
 
@@ -296,13 +296,13 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 	protected void doCommit(DefaultTransactionStatus status) {
 		AnterosTransactionObject txObject = (AnterosTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
-			logger.debug("Committing Hibernate transaction on Session ["
+			logger.debug("Committing Anteros transaction on Session ["
 					+ SQLSessionFactoryUtils.toString(txObject.getSQLSessionHolder().getSQLSession()) + "]");
 		}
 		try {
 			txObject.getSQLSessionHolder().getTransaction().commit();
 		} catch (Exception ex) {
-			throw new TransactionSystemException("Could not commit Hibernate transaction", ex);
+			throw new TransactionSystemException("Could not commit Anteros transaction", ex);
 		}
 	}
 
@@ -310,19 +310,19 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 	protected void doRollback(DefaultTransactionStatus status) {
 		AnterosTransactionObject txObject = (AnterosTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
-			logger.debug("Rolling back Hibernate transaction on Session ["
+			logger.debug("Rolling back Anteros transaction on Session ["
 					+ SQLSessionFactoryUtils.toString(txObject.getSQLSessionHolder().getSQLSession()) + "]");
 		}
 		try {
 			txObject.getSQLSessionHolder().getTransaction().rollback();
 		} catch (Exception ex) {
-			throw new TransactionSystemException("Could not roll back Hibernate transaction", ex);
+			throw new TransactionSystemException("Could not roll back Anteros transaction", ex);
 		} finally {
 			if (!txObject.isNewSession() && !this.managedSession) {
 				try {
 					txObject.getSQLSessionHolder().getSQLSession().clear();
 				} catch (Exception e) {
-					throw new TransactionSystemException("Could not roll back Hibernate transaction", e);
+					throw new TransactionSystemException("Could not roll back Anteros transaction", e);
 				}
 			}
 		}
@@ -332,7 +332,7 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 	protected void doSetRollbackOnly(DefaultTransactionStatus status) {
 		AnterosTransactionObject txObject = (AnterosTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
-			logger.debug("Setting Hibernate transaction on Session ["
+			logger.debug("Setting Anteros transaction on Session ["
 					+ SQLSessionFactoryUtils.toString(txObject.getSQLSessionHolder().getSQLSession())
 					+ "] rollback-only");
 		}
@@ -357,19 +357,19 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 				Connection con = session.getConnection();
 				DataSourceUtils.resetConnectionAfterTransaction(con, txObject.getPreviousIsolationLevel());
 			} catch (Exception ex) {
-				logger.debug("Could not access JDBC Connection of Hibernate Session", ex);
+				logger.debug("Could not access JDBC Connection of Anteros Session", ex);
 			}
 		}
 
 		if (txObject.isNewSession()) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Closing Hibernate Session [" + SQLSessionFactoryUtils.toString(session)
+				logger.debug("Closing Anteros Session [" + SQLSessionFactoryUtils.toString(session)
 						+ "] after transaction");
 			}
 			SQLSessionFactoryUtils.closeSessionOrRegisterDeferredClose(session, getSQLSessionFactory());
 		} else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Not closing pre-bound Hibernate Session [" + SQLSessionFactoryUtils.toString(session)
+				logger.debug("Not closing pre-bound Anteros Session [" + SQLSessionFactoryUtils.toString(session)
 						+ "] after transaction");
 			}
 			if (!this.managedSession) {
@@ -383,10 +383,6 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 		txObject.getSQLSessionHolder().clear();
 	}
 
-	/**
-	 * Hibernate transaction object, representing a SQLSessionHolder. Used as
-	 * transaction object by HibernateTransactionManager.
-	 */
 	private class AnterosTransactionObject extends JdbcTransactionObjectSupport {
 
 		private SQLSessionHolder sessionHolder;
