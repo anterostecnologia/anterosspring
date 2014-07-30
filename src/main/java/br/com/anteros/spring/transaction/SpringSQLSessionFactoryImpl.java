@@ -41,8 +41,7 @@ public class SpringSQLSessionFactoryImpl extends AbstractSQLSessionFactory {
 	
 	@Override
 	protected CurrentSQLSessionContext buildCurrentSessionContext() throws Exception {
-		configuration.addProperty(AnterosPersistenceProperties.CURRENT_SESSION_CONTEXT, SpringSQLSessionContext.class.getName());
-		return super.buildCurrentSessionContext();
+		return new SpringSQLSessionContext(this);
 	}
 
 	@Override

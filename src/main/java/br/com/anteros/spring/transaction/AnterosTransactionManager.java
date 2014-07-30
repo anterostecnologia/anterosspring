@@ -422,7 +422,11 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 		}
 
 		public boolean hasSpringManagedTransaction() {
-			return (this.sessionHolder != null && this.sessionHolder.getTransaction() != null);
+			try {
+				return this.sessionHolder != null && this.sessionHolder.getTransaction().isActive();
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
 		}
 
 		public boolean hasManagedTransaction() throws Exception {
