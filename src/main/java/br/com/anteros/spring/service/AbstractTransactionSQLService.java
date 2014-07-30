@@ -1,7 +1,6 @@
 package br.com.anteros.spring.service;
 
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 
 import javax.annotation.PostConstruct;
 
@@ -11,7 +10,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.anteros.persistence.service.AbstractSQLService;
-import br.com.anteros.persistence.session.SQLSession;
 import br.com.anteros.persistence.session.SQLSessionFactory;
 import br.com.anteros.persistence.session.dao.SQLDao;
 
@@ -36,7 +34,7 @@ public abstract class AbstractTransactionSQLService<T> extends AbstractSQLServic
 			// descobre automaticamente qual a classe do tipo T
 			Class<T> clazz = (Class<T>) ((ParameterizedType) this.getClass().getGenericSuperclass())
 					.getActualTypeArguments()[0];
-			dao = new SQLDao<T>(sqlSessionFactory,
+			dao = new SQLDao<T>(sqlSessionFactory.getCurrentSession(),
 					clazz);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
