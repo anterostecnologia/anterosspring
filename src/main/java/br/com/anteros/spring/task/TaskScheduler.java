@@ -16,7 +16,6 @@ import br.com.anteros.persistence.session.SQLSessionFactory;
  *
  */
 @EnableScheduling
-@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
 public abstract class TaskScheduler {
 
 	@Autowired
@@ -25,7 +24,6 @@ public abstract class TaskScheduler {
 	/**
 	 * Método responsável por executar a tarefa agendada.
 	 */
-	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = false)
 	public abstract void taskExecutor();
 
 }
