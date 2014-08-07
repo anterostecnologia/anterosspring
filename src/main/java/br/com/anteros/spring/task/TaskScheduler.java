@@ -2,8 +2,6 @@ package br.com.anteros.spring.task;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import br.com.anteros.persistence.session.SQLSessionFactory;
 

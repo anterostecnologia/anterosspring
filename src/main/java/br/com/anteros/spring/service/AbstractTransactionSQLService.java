@@ -27,7 +27,7 @@ public abstract class AbstractTransactionSQLService<T> extends AbstractSQLServic
 
 	@Autowired
 	protected SQLSessionFactory sqlSessionFactory;
-	
+
 	@PostConstruct
 	public void initDao() {
 		try {
