@@ -65,12 +65,12 @@ public class SpringSQLSessionFactoryImpl extends AbstractSQLSessionFactory {
 	}
 
 	@Override
-	public void beforeGenerateDDL() throws Exception {
+	public void beforeGenerateDDL(SQLSession session) throws Exception {
 
 	}
 
 	@Override
-	public void afterGenerateDDL() throws Exception {
+	public void afterGenerateDDL(SQLSession session) throws Exception {
 
 	}
 
