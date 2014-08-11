@@ -29,13 +29,13 @@ public abstract class AbstractTransactionSQLService<T> extends AbstractSQLServic
 	protected SQLSessionFactory sqlSessionFactory;
 
 	@PostConstruct
+	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
 	public void initDao() {
 		try {
 			// descobre automaticamente qual a classe do tipo T
 			Class<T> clazz = (Class<T>) ((ParameterizedType) this.getClass().getGenericSuperclass())
 					.getActualTypeArguments()[0];
-			dao = new SQLDao<T>(sqlSessionFactory.getCurrentSession(),
-					clazz);
+			dao = new SQLDao<T>(sqlSessionFactory, clazz);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
