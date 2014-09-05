@@ -26,6 +26,7 @@ import org.springframework.util.Assert;
 import br.com.anteros.persistence.session.AbstractSQLSessionFactory;
 import br.com.anteros.persistence.session.SQLSession;
 import br.com.anteros.persistence.session.SQLSessionFactory;
+import br.com.anteros.spring.util.AnterosSpringTranslate;
 
 public abstract class SQLSessionFactoryUtils {
 
@@ -154,8 +155,7 @@ public abstract class SQLSessionFactoryUtils {
 		// Check whether we are allowed to return the Session.
 		if (!allowCreate && !isSessionTransactional(session, sessionFactory)) {
 			closeSession(session);
-			throw new IllegalStateException("No Anteros SQLSession bound to thread, "
-					+ "and configuration does not allow creation of non-transactional one here");
+			throw new IllegalStateException(AnterosSpringTranslate.getMessage(SQLSessionFactoryUtils.class, "NoSessionBoundToThread"));
 		}
 
 		return session;

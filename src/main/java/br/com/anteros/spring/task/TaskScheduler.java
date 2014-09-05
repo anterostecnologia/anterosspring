@@ -17,7 +17,7 @@ import br.com.anteros.persistence.session.SQLSessionFactory;
 public abstract class TaskScheduler {
 
 	@Autowired
-	protected SQLSessionFactory sqlSessionFactory;
+	protected SQLSessionFactory sessionFactory;
 
 	/**
 	 * Método responsável por executar a tarefa agendada.
