@@ -16,7 +16,7 @@ import br.com.anteros.persistence.session.service.GenericSQLService;
 
 
 @Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
-public class TransactionalSQLService<T, ID extends Serializable> extends GenericSQLService<T, ID> {
+public class SpringTransactionalSQLService<T, ID extends Serializable> extends GenericSQLService<T, ID> {
 
 	@Override
 	@Autowired 
