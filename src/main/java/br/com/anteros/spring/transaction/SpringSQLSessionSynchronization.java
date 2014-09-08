@@ -100,7 +100,7 @@ class SpringSQLSessionSynchronization implements TransactionSynchronization, Ord
 			try {
 				getCurrentSession().close();
 			} catch (Exception e) {
-				new RuntimeException(e);
+				throw new RuntimeException(e);
 			}
 		}
 	}
@@ -152,7 +152,7 @@ class SpringSQLSessionSynchronization implements TransactionSynchronization, Ord
 					try {
 						session.close();
 					} catch (Exception e) {
-						new RuntimeException(e);
+						throw new RuntimeException(e);
 					}
 				}
 				return;
@@ -179,7 +179,7 @@ class SpringSQLSessionSynchronization implements TransactionSynchronization, Ord
 				try {
 					session.close();
 				} catch (Exception e) {
-					new RuntimeException(e);
+					throw new RuntimeException(e);
 				}
 			}
 		}
@@ -211,7 +211,7 @@ class SpringSQLSessionSynchronization implements TransactionSynchronization, Ord
 				try {
 					this.sQLSessionHolder.getSQLSession().clear();
 				} catch (Exception e) {
-					new RuntimeException(e);
+					throw new RuntimeException(e);
 				}
 			}
 		}
