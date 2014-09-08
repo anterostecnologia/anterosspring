@@ -21,7 +21,6 @@ import br.com.anteros.persistence.session.impl.SQLSessionImpl;
 import br.com.anteros.persistence.transaction.TransactionFactory;
 import br.com.anteros.persistence.transaction.TransactionManagerLookup;
 import br.com.anteros.persistence.transaction.impl.JDBCTransactionFactory;
-import br.com.anteros.persistence.transaction.impl.JNDITransactionManagerLookup;
 import br.com.anteros.persistence.transaction.impl.TransactionException;
 
 public class SpringSQLSessionFactoryImpl extends AbstractSQLSessionFactory {
