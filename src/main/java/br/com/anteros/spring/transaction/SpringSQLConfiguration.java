@@ -41,7 +41,7 @@ public class SpringSQLConfiguration extends AnterosPersistenceConfiguration {
 	public SQLSessionFactory buildSessionFactory() throws Exception {
 		buildDataSource();
 		if (dataSource == null)
-			throw new AnterosConfigurationException(AnterosSpringTranslate.getMessage(this.getClass(), "datasourceNotConfigured"));
+			throw new AnterosConfigurationException(AnterosSpringTranslate.getInstance().getMessage(this.getClass(), "datasourceNotConfigured"));
 		loadEntities();
 		SpringSQLSessionFactoryImpl sessionFactory = new SpringSQLSessionFactoryImpl(entityCacheManager, dataSource,
 				this.getSessionFactoryConfiguration());

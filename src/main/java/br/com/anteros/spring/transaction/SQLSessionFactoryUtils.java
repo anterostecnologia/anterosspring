@@ -155,7 +155,7 @@ public abstract class SQLSessionFactoryUtils {
 		// Check whether we are allowed to return the Session.
 		if (!allowCreate && !isSessionTransactional(session, sessionFactory)) {
 			closeSession(session);
-			throw new IllegalStateException(AnterosSpringTranslate.getMessage(SQLSessionFactoryUtils.class, "NoSessionBoundToThread"));
+			throw new IllegalStateException(AnterosSpringTranslate.getInstance().getMessage(SQLSessionFactoryUtils.class, "NoSessionBoundToThread"));
 		}
 
 		return session;
