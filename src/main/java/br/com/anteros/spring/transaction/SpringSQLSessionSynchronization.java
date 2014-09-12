@@ -7,6 +7,7 @@ import javax.transaction.TransactionManager;
 import org.springframework.core.Ordered;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -16,7 +17,7 @@ import br.com.anteros.persistence.session.SQLSessionFactory;
 
 class SpringSQLSessionSynchronization implements TransactionSynchronization, Ordered {
 
-	private final SQLSessionHolder sQLSessionHolder;
+	private final SQLSessionHolder sessionHolder;
 
 	private final SQLSessionFactory sessionFactory;
 
@@ -30,26 +31,17 @@ class SpringSQLSessionSynchronization implements TransactionSynchronization, Ord
 
 
 	public SpringSQLSessionSynchronization(
-			SQLSessionHolder sQLSessionHolder, SQLSessionFactory sessionFactory,
-			boolean newSession) {
+			SQLSessionHolder sessionHolder, SQLSessionFactory sessionFactory,
+			SQLExceptionTranslator jdbcExceptionTranslator, boolean newSession) throws Exception {
 
-		this.sQLSessionHolder = sQLSessionHolder;
+		this.sessionHolder = sessionHolder;
 		this.sessionFactory = sessionFactory;
 		this.newSession = newSession;
 
-		// Check whether the SessionFactory has a JTA TransactionManager.
-		TransactionManager jtaTm;
-		try {
-			jtaTm = SQLSessionFactoryUtils.getJtaTransactionManager(sessionFactory, sQLSessionHolder.getAnySQLSession());
-		} catch (Exception ex) {
-			throw new DataAccessResourceFailureException("Could not access JTA transaction", ex);
-		}
-		
+		TransactionManager jtaTm =
+				SQLSessionFactoryUtils.getJtaTransactionManager(sessionFactory, sessionHolder.getAnySession());
 		if (jtaTm != null) {
 			this.transactionCompletion = true;
-			// Fetch current JTA Transaction object
-			// (just necessary for JTA transaction suspension, with an individual
-			// Anteros SQLSession per currently active/suspended transaction).
 			try {
 				this.jtaTransaction = jtaTm.getTransaction();
 			}
@@ -59,14 +51,13 @@ class SpringSQLSessionSynchronization implements TransactionSynchronization, Ord
 		}
 	}
 
-
 	private SQLSession getCurrentSession() {
 		SQLSession session = null;
 		if (this.jtaTransaction != null) {
-			session = this.sQLSessionHolder.getSQLSession(this.jtaTransaction);
+			session = this.sessionHolder.getSession(this.jtaTransaction);
 		}
 		if (session == null) {
-			session = this.sQLSessionHolder.getSQLSession();
+			session = this.sessionHolder.getSession();
 		}
 		return session;
 	}
@@ -76,6 +67,7 @@ class SpringSQLSessionSynchronization implements TransactionSynchronization, Ord
 	public int getOrder() {
 		return SQLSessionFactoryUtils.SESSION_SYNCHRONIZATION_ORDER;
 	}
+
 
 	@Override
 	public void suspend() {
@@ -92,7 +84,7 @@ class SpringSQLSessionSynchronization implements TransactionSynchronization, Ord
 	@Override
 	public void resume() {
 		if (this.holderActive) {
-			TransactionSynchronizationManager.bindResource(this.sessionFactory, this.sQLSessionHolder);
+			TransactionSynchronizationManager.bindResource(this.sessionFactory, this.sessionHolder);
 		}
 	}
 
@@ -117,22 +109,16 @@ class SpringSQLSessionSynchronization implements TransactionSynchronization, Ord
 	@Override
 	public void beforeCompletion() {
 		if (this.jtaTransaction != null) {
-			// Typically in case of a suspended JTA transaction:
-			// Remove the Session for the current JTA transaction, but keep the holder.
-			SQLSession session = this.sQLSessionHolder.removeSQLSession(this.jtaTransaction);
+			SQLSession session = this.sessionHolder.removeSession(this.jtaTransaction);
 			if (session != null) {
-				if (this.sQLSessionHolder.isEmpty()) {
-					// No Sessions for JTA transactions bound anymore -> could remove it.
+				if (this.sessionHolder.isEmpty()) {
 					TransactionSynchronizationManager.unbindResourceIfPossible(this.sessionFactory);
 					this.holderActive = false;
 				}
-				// Do not close a pre-bound Session. In that case, we'll find the
-				// transaction-specific Session the same as the default Session.
-				if (session != this.sQLSessionHolder.getSQLSession()) {
+				if (session != this.sessionHolder.getSession()) {
 					SQLSessionFactoryUtils.closeSessionOrRegisterDeferredClose(session, this.sessionFactory);
 				}
 				else {
-					// Eagerly disconnect the Session here, to make release mode "on_close" work nicely.
 					try {
 						session.close();
 					} catch (Exception e) {
@@ -142,24 +128,16 @@ class SpringSQLSessionSynchronization implements TransactionSynchronization, Ord
 				return;
 			}
 		}
-		// We'll only get here if there was no specific JTA transaction to handle.
 		if (this.newSession) {
-			// Default behavior: unbind and close the thread-bound Anteros SQLSession.
 			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
 			this.holderActive = false;
 			if (this.transactionCompletion) {
-				// Close the Anteros SQLSession here in case of a Anteros TransactionManagerLookup:
-				// Anteros will automatically defer the actual closing until JTA transaction completion.
-				// Else, the Session will be closed in the afterCompletion method, to provide the
-				// correct transaction status for releasing the Session's cache locks.
-				SQLSessionFactoryUtils.closeSessionOrRegisterDeferredClose(this.sQLSessionHolder.getSQLSession(), this.sessionFactory);
+				SQLSessionFactoryUtils.closeSessionOrRegisterDeferredClose(this.sessionHolder.getSession(), this.sessionFactory);
 			}
 		}
 		else  {
-			SQLSession session = this.sQLSessionHolder.getSQLSession();
+			SQLSession session = this.sessionHolder.getSession();
 			if (this.transactionCompletion) {
-				// Eagerly disconnect the Session here, to make release mode "on_close" work nicely.
-				// We know that this is appropriate if a TransactionManagerLookup has been specified.
 				try {
 					session.close();
 				} catch (Exception e) {
@@ -177,31 +155,22 @@ class SpringSQLSessionSynchronization implements TransactionSynchronization, Ord
 	public void afterCompletion(int status) {
 		try {
 			if (!this.transactionCompletion || !this.newSession) {
-				// No Anteros TransactionManagerLookup: apply afterTransactionCompletion callback.
-				// Always perform explicit afterTransactionCompletion callback for pre-bound Session,
-				// even with Anteros TransactionManagerLookup (which only applies to new Sessions).
-				SQLSession session = this.sQLSessionHolder.getSQLSession();
-				// Provide correct transaction status for releasing the Session's cache locks,
-				// if possible. Else, closing will release all cache locks assuming a rollback.
-					// Close the Anteros SQLSession here if necessary
-					// (closed in beforeCompletion in case of TransactionManagerLookup).
+				SQLSession session = this.sessionHolder.getSession();
 					if (this.newSession) {
 						SQLSessionFactoryUtils.closeSessionOrRegisterDeferredClose(session, this.sessionFactory);
 					}
 			}
 			if (!this.newSession && status != STATUS_COMMITTED) {
-				// Clear all pending inserts/updates/deletes in the Session.
-				// Necessary for pre-bound Sessions, to avoid inconsistent state.
 				try {
-					this.sQLSessionHolder.getSQLSession().clear();
+					this.sessionHolder.getSession().clear();
 				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
 			}
 		}
 		finally {
-			if (this.sQLSessionHolder.doesNotHoldNonDefaultSession()) {
-				this.sQLSessionHolder.setSynchronizedWithTransaction(false);
+			if (this.sessionHolder.doesNotHoldNonDefaultSession()) {
+				this.sessionHolder.setSynchronizedWithTransaction(false);
 			}
 		}
 	}

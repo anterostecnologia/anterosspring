@@ -4,7 +4,6 @@ import java.sql.Connection;
 
 import javax.sql.DataSource;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
@@ -13,6 +12,7 @@ import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
+import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.IllegalTransactionStateException;
@@ -28,10 +28,9 @@ import br.com.anteros.persistence.session.SQLSession;
 import br.com.anteros.persistence.session.SQLSessionFactory;
 import br.com.anteros.persistence.transaction.Transaction;
 
+@SuppressWarnings("serial")
 public class AnterosTransactionManager extends AbstractPlatformTransactionManager implements
 		ResourceTransactionManager, BeanFactoryAware, InitializingBean {
-
-	private static final long serialVersionUID = 1L;
 
 	private SQLSessionFactory sessionFactory;
 
@@ -46,8 +45,9 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 	private boolean earlyFlushBeforeCommit = false;
 
 	private SQLExceptionTranslator jdbcExceptionTranslator;
-	
-	@SuppressWarnings("unused")
+
+	private SQLExceptionTranslator defaultJdbcExceptionTranslator;
+
 	private BeanFactory beanFactory;
 
 	public AnterosTransactionManager() {
@@ -62,7 +62,7 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 		this.sessionFactory = sessionFactory;
 	}
 
-	public SQLSessionFactory getSQLSessionFactory() {
+	public SQLSessionFactory getSessionFactory() {
 		return this.sessionFactory;
 	}
 
@@ -103,13 +103,18 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 	}
 
 	@Override
+	public void setBeanFactory(BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
+	}
+
+	@Override
 	public void afterPropertiesSet() {
-		if (getSQLSessionFactory() == null) {
+		if (getSessionFactory() == null) {
 			throw new IllegalArgumentException("Property 'sessionFactory' is required");
 		}
 
 		if (this.autodetectDataSource && getDataSource() == null) {
-			DataSource sfds = SQLSessionFactoryUtils.getDataSource(getSQLSessionFactory());
+			DataSource sfds = SQLSessionFactoryUtils.getDataSource(getSessionFactory());
 			if (sfds != null) {
 				if (logger.isInfoEnabled()) {
 					logger.info("Using DataSource [" + sfds
@@ -122,7 +127,7 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 
 	@Override
 	public Object getResourceFactory() {
-		return getSQLSessionFactory();
+		return getSessionFactory();
 	}
 
 	@Override
@@ -130,26 +135,25 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 		AnterosTransactionObject txObject = new AnterosTransactionObject();
 		txObject.setSavepointAllowed(isNestedTransactionAllowed());
 
-		SQLSessionHolder SQLSessionHolder = (SQLSessionHolder) TransactionSynchronizationManager
-				.getResource(getSQLSessionFactory());
-		if (SQLSessionHolder != null) {
+		SQLSessionHolder sessionHolder = (SQLSessionHolder) TransactionSynchronizationManager
+				.getResource(getSessionFactory());
+		if (sessionHolder != null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Found thread-bound Session ["
-						+ SQLSessionFactoryUtils.toString(SQLSessionHolder.getSQLSession())
+				logger.debug("Found thread-bound SQLSession [" + SQLSessionFactoryUtils.toString(sessionHolder.getSession())
 						+ "] for Anteros transaction");
 			}
-			txObject.setSQLSessionHolder(SQLSessionHolder);
+			txObject.setSessionHolder(sessionHolder);
 		} else if (this.managedSession) {
 			try {
-				SQLSession session = getSQLSessionFactory().getCurrentSession();
+				SQLSession session = getSessionFactory().getCurrentSession();
 				if (logger.isDebugEnabled()) {
-					logger.debug("Found Anteros-managed Session [" + SQLSessionFactoryUtils.toString(session)
+					logger.debug("Found Anteros-managed SQLSession [" + SQLSessionFactoryUtils.toString(session)
 							+ "] for Spring-managed transaction");
 				}
 				txObject.setExistingSession(session);
 			} catch (Exception ex) {
 				throw new DataAccessResourceFailureException(
-						"Could not obtain A-managed Session for Spring-managed transaction", ex);
+						"Could not obtain Anteros-managed SQLSession for Spring-managed transaction", ex);
 			}
 		}
 
@@ -174,6 +178,7 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		AnterosTransactionObject txObject = (AnterosTransactionObject) transaction;
 
@@ -188,21 +193,20 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 		SQLSession session = null;
 
 		try {
-			if (txObject.getSQLSessionHolder() == null
-					|| txObject.getSQLSessionHolder().isSynchronizedWithTransaction()) {
-				SQLSession newSession = getSQLSessionFactory().openSession();
+			if (txObject.getSessionHolder() == null || txObject.getSessionHolder().isSynchronizedWithTransaction()) {
+				SQLSession newSession = getSessionFactory().openSession();
 				if (logger.isDebugEnabled()) {
-					logger.debug("Opened new Session [" + SQLSessionFactoryUtils.toString(newSession)
+					logger.debug("Opened new SQLSession [" + SQLSessionFactoryUtils.toString(newSession)
 							+ "] for Anteros transaction");
 				}
 				txObject.setSession(newSession);
 			}
 
-			session = txObject.getSQLSessionHolder().getSQLSession();
+			session = txObject.getSessionHolder().getSession();
 
 			if (this.prepareConnection) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Preparing JDBC Connection of Anteros Session ["
+					logger.debug("Preparing JDBC Connection of Anteros SQLSession ["
 							+ SQLSessionFactoryUtils.toString(session) + "]");
 				}
 				Connection con = session.getConnection();
@@ -214,8 +218,8 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 							"AnterosTransactionManager is not allowed to support custom isolation levels: "
 									+ "make sure that its 'prepareConnection' flag is on (the default) and that the "
 									+ "Anteros connection release mode is set to 'on_close' (SpringTransactionFactory's default). "
-									+ "Make sure that your SpringSQLSessionFactoryBean actually uses JDBCTransactionFactory: Your "
-									+ "Anteros properties should *not* include a 'transaction-factory' property!");
+									+ "Make sure that your LocalSessionFactoryBean actually uses SpringTransactionFactory: Your "
+									+ "Anteros properties should *not* include a 'anteros.transaction.factory_class' property!");
 				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("Not preparing JDBC Connection of Anteros Session ["
@@ -225,12 +229,17 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 
 			Transaction hibTx = session.getTransaction();
 			hibTx.begin();
+			
+			int timeout = determineTimeout(definition);
 
-			txObject.getSQLSessionHolder().setTransaction(hibTx);
+			txObject.getSessionHolder().setTransaction(hibTx);
 
 			if (getDataSource() != null) {
 				Connection con = session.getConnection();
 				ConnectionHolder conHolder = new ConnectionHolder(con);
+				if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
+					conHolder.setTimeoutInSeconds(timeout);
+				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("Exposing Anteros transaction as JDBC transaction [" + con + "]");
 				}
@@ -238,10 +247,10 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 				txObject.setConnectionHolder(conHolder);
 			}
 
-			if (txObject.isNewSQLSessionHolder()) {
-				TransactionSynchronizationManager.bindResource(getSQLSessionFactory(), txObject.getSQLSessionHolder());
+			if (txObject.isNewSessionHolder()) {
+				TransactionSynchronizationManager.bindResource(getSessionFactory(), txObject.getSessionHolder());
 			}
-			txObject.getSQLSessionHolder().setSynchronizedWithTransaction(true);
+			txObject.getSessionHolder().setSynchronizedWithTransaction(true);
 		}
 
 		catch (Throwable ex) {
@@ -256,31 +265,31 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 					SQLSessionFactoryUtils.closeSession(session);
 				}
 			}
-			throw new CannotCreateTransactionException("Could not open Anteros Session for transaction", ex);
+			throw new CannotCreateTransactionException("Could not open Anteros SQLSession for transaction", ex);
 		}
 	}
 
 	@Override
 	protected Object doSuspend(Object transaction) {
 		AnterosTransactionObject txObject = (AnterosTransactionObject) transaction;
-		txObject.setSQLSessionHolder(null);
-		SQLSessionHolder SQLSessionHolder = (SQLSessionHolder) TransactionSynchronizationManager
-				.unbindResource(getSQLSessionFactory());
+		txObject.setSessionHolder(null);
+		SQLSessionHolder sessionHolder = (SQLSessionHolder) TransactionSynchronizationManager
+				.unbindResource(getSessionFactory());
 		txObject.setConnectionHolder(null);
 		ConnectionHolder connectionHolder = null;
 		if (getDataSource() != null) {
 			connectionHolder = (ConnectionHolder) TransactionSynchronizationManager.unbindResource(getDataSource());
 		}
-		return new SuspendedResourcesHolder(SQLSessionHolder, connectionHolder);
+		return new SuspendedResourcesHolder(sessionHolder, connectionHolder);
 	}
 
 	@Override
 	protected void doResume(Object transaction, Object suspendedResources) {
 		SuspendedResourcesHolder resourcesHolder = (SuspendedResourcesHolder) suspendedResources;
-		if (TransactionSynchronizationManager.hasResource(getSQLSessionFactory())) {
-			TransactionSynchronizationManager.unbindResource(getSQLSessionFactory());
+		if (TransactionSynchronizationManager.hasResource(getSessionFactory())) {
+			TransactionSynchronizationManager.unbindResource(getSessionFactory());
 		}
-		TransactionSynchronizationManager.bindResource(getSQLSessionFactory(), resourcesHolder.getSQLSessionHolder());
+		TransactionSynchronizationManager.bindResource(getSessionFactory(), resourcesHolder.getSessionHolder());
 		if (getDataSource() != null) {
 			TransactionSynchronizationManager.bindResource(getDataSource(), resourcesHolder.getConnectionHolder());
 		}
@@ -296,11 +305,11 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 	protected void doCommit(DefaultTransactionStatus status) {
 		AnterosTransactionObject txObject = (AnterosTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
-			logger.debug("Committing Anteros transaction on Session ["
-					+ SQLSessionFactoryUtils.toString(txObject.getSQLSessionHolder().getSQLSession()) + "]");
+			logger.debug("Committing Anteros transaction on SQLSession ["
+					+ SQLSessionFactoryUtils.toString(txObject.getSessionHolder().getSession()) + "]");
 		}
 		try {
-			txObject.getSQLSessionHolder().getTransaction().commit();
+			txObject.getSessionHolder().getTransaction().commit();
 		} catch (Exception ex) {
 			throw new TransactionSystemException("Could not commit Anteros transaction", ex);
 		}
@@ -310,19 +319,19 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 	protected void doRollback(DefaultTransactionStatus status) {
 		AnterosTransactionObject txObject = (AnterosTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
-			logger.debug("Rolling back Anteros transaction on Session ["
-					+ SQLSessionFactoryUtils.toString(txObject.getSQLSessionHolder().getSQLSession()) + "]");
+			logger.debug("Rolling back Anteros transaction on SQLSession ["
+					+ SQLSessionFactoryUtils.toString(txObject.getSessionHolder().getSession()) + "]");
 		}
 		try {
-			txObject.getSQLSessionHolder().getTransaction().rollback();
+			txObject.getSessionHolder().getTransaction().rollback();
 		} catch (Exception ex) {
 			throw new TransactionSystemException("Could not roll back Anteros transaction", ex);
 		} finally {
 			if (!txObject.isNewSession() && !this.managedSession) {
 				try {
-					txObject.getSQLSessionHolder().getSQLSession().clear();
+					txObject.getSessionHolder().getSession().clear();
 				} catch (Exception e) {
-					throw new TransactionSystemException("Could not roll back Anteros transaction", e);
+					throw new RuntimeException(e);
 				}
 			}
 		}
@@ -332,55 +341,73 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 	protected void doSetRollbackOnly(DefaultTransactionStatus status) {
 		AnterosTransactionObject txObject = (AnterosTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
-			logger.debug("Setting Anteros transaction on Session ["
-					+ SQLSessionFactoryUtils.toString(txObject.getSQLSessionHolder().getSQLSession())
-					+ "] rollback-only");
+			logger.debug("Setting Anteros transaction on SQLSession ["
+					+ SQLSessionFactoryUtils.toString(txObject.getSessionHolder().getSession()) + "] rollback-only");
 		}
 		txObject.setRollbackOnly();
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	protected void doCleanupAfterCompletion(Object transaction) {
 		AnterosTransactionObject txObject = (AnterosTransactionObject) transaction;
 
-		if (txObject.isNewSQLSessionHolder()) {
-			TransactionSynchronizationManager.unbindResource(getSQLSessionFactory());
+		if (txObject.isNewSessionHolder()) {
+			TransactionSynchronizationManager.unbindResource(getSessionFactory());
 		}
 
 		if (getDataSource() != null) {
 			TransactionSynchronizationManager.unbindResource(getDataSource());
 		}
 
-		SQLSession session = txObject.getSQLSessionHolder().getSQLSession();
-		if (this.prepareConnection) {
+		SQLSession session = txObject.getSessionHolder().getSession();
+		boolean closed;
+		try {
+			closed = session.isClosed();
+		} catch (Exception e1) {
+			throw new RuntimeException(e1);
+		}
+		if (this.prepareConnection && !closed) {
 			try {
 				Connection con = session.getConnection();
 				DataSourceUtils.resetConnectionAfterTransaction(con, txObject.getPreviousIsolationLevel());
 			} catch (Exception ex) {
-				logger.debug("Could not access JDBC Connection of Anteros Session", ex);
+				logger.debug("Could not access JDBC Connection of Anteros SQLSession", ex);
 			}
 		}
 
 		if (txObject.isNewSession()) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Closing Anteros Session [" + SQLSessionFactoryUtils.toString(session)
+				logger.debug("Closing Anteros SQLSession [" + SQLSessionFactoryUtils.toString(session)
 						+ "] after transaction");
 			}
-			SQLSessionFactoryUtils.closeSessionOrRegisterDeferredClose(session, getSQLSessionFactory());
+			SQLSessionFactoryUtils.closeSessionOrRegisterDeferredClose(session, getSessionFactory());
 		} else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Not closing pre-bound Anteros Session [" + SQLSessionFactoryUtils.toString(session)
+				logger.debug("Not closing pre-bound Anteros SQLSession [" + SQLSessionFactoryUtils.toString(session)
 						+ "] after transaction");
 			}
 			if (!this.managedSession) {
 				try {
 					session.close();
 				} catch (Exception e) {
-					e.printStackTrace();
+					throw new RuntimeException(e);
 				}
 			}
 		}
-		txObject.getSQLSessionHolder().clear();
+		txObject.getSessionHolder().clear();
+	}
+
+	protected synchronized SQLExceptionTranslator getDefaultJdbcExceptionTranslator() {
+		if (this.defaultJdbcExceptionTranslator == null) {
+			if (getDataSource() != null) {
+				this.defaultJdbcExceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(getDataSource());
+			} else {
+				this.defaultJdbcExceptionTranslator = SQLSessionFactoryUtils
+						.newJdbcExceptionTranslator(getSessionFactory());
+			}
+		}
+		return this.defaultJdbcExceptionTranslator;
 	}
 
 	private class AnterosTransactionObject extends JdbcTransactionObjectSupport {
@@ -403,17 +430,17 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 			this.newSession = false;
 		}
 
-		public void setSQLSessionHolder(SQLSessionHolder sessionHolder) {
+		public void setSessionHolder(SQLSessionHolder sessionHolder) {
 			this.sessionHolder = sessionHolder;
 			this.newSessionHolder = false;
 			this.newSession = false;
 		}
 
-		public SQLSessionHolder getSQLSessionHolder() {
+		public SQLSessionHolder getSessionHolder() {
 			return this.sessionHolder;
 		}
 
-		public boolean isNewSQLSessionHolder() {
+		public boolean isNewSessionHolder() {
 			return this.newSessionHolder;
 		}
 
@@ -421,16 +448,13 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 			return this.newSession;
 		}
 
+
 		public boolean hasSpringManagedTransaction() {
-			try {
-				return this.sessionHolder != null && this.sessionHolder.getTransaction().isActive();
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
+				return (this.sessionHolder != null && this.sessionHolder.getTransaction() != null);
 		}
 
 		public boolean hasManagedTransaction() throws Exception {
-			return (this.sessionHolder != null && this.sessionHolder.getSQLSession().getTransaction().isActive());
+			return (this.sessionHolder != null && this.sessionHolder.getSession().getTransaction().isActive());
 		}
 
 		public void setRollbackOnly() {
@@ -449,36 +473,32 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 		@Override
 		public void flush() {
 			try {
-				this.sessionHolder.getSQLSession().flush();
+				this.sessionHolder.getSession().flush();
 			} catch (Exception ex) {
 				throw new RuntimeException(ex);
 			}
 		}
 	}
 
+	
 	private static class SuspendedResourcesHolder {
 
-		private final SQLSessionHolder SQLSessionHolder;
+		private final SQLSessionHolder sessionHolder;
 
 		private final ConnectionHolder connectionHolder;
 
-		private SuspendedResourcesHolder(SQLSessionHolder SQLSessionHolder, ConnectionHolder conHolder) {
-			this.SQLSessionHolder = SQLSessionHolder;
+		private SuspendedResourcesHolder(SQLSessionHolder sessionHolder, ConnectionHolder conHolder) {
+			this.sessionHolder = sessionHolder;
 			this.connectionHolder = conHolder;
 		}
 
-		private SQLSessionHolder getSQLSessionHolder() {
-			return this.SQLSessionHolder;
+		private SQLSessionHolder getSessionHolder() {
+			return this.sessionHolder;
 		}
 
 		private ConnectionHolder getConnectionHolder() {
 			return this.connectionHolder;
 		}
-	}
-
-	@Override
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		this.beanFactory = beanFactory;		
 	}
 
 }
