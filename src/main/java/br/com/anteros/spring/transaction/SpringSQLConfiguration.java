@@ -17,11 +17,9 @@ package br.com.anteros.spring.transaction;
 
 import javax.sql.DataSource;
 
-import br.com.anteros.core.configuration.exception.AnterosConfigurationException;
 import br.com.anteros.persistence.metadata.configuration.ModelConfiguration;
 import br.com.anteros.persistence.session.SQLSessionFactory;
 import br.com.anteros.persistence.session.configuration.AnterosPersistenceConfiguration;
-import br.com.anteros.spring.util.AnterosSpringTranslate;
 
 public class SpringSQLConfiguration extends AnterosPersistenceConfiguration {
 
@@ -39,9 +37,8 @@ public class SpringSQLConfiguration extends AnterosPersistenceConfiguration {
 
 	@Override
 	public SQLSessionFactory buildSessionFactory() throws Exception {
-		buildDataSource();
-		if (dataSource == null)
-			throw new AnterosConfigurationException(AnterosSpringTranslate.getInstance().getMessage(this.getClass(), "datasourceNotConfigured"));
+		prepareClassesToLoad();
+		buildDataSource();		
 		loadEntities();
 		SpringSQLSessionFactoryImpl sessionFactory = new SpringSQLSessionFactoryImpl(entityCacheManager, dataSource,
 				this.getSessionFactoryConfiguration());

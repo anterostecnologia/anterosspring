@@ -1,5 +1,6 @@
 package br.com.anteros.spring.transaction;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -9,7 +10,14 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
+import br.com.anteros.core.configuration.PackageScanEntity;
+import br.com.anteros.core.scanner.ClassFilter;
+import br.com.anteros.core.scanner.ClassPathScanner;
+import br.com.anteros.core.utils.StringUtils;
+import br.com.anteros.persistence.metadata.annotation.Entity;
 import br.com.anteros.persistence.session.SQLSessionFactory;
+import br.com.anteros.persistence.session.exception.SQLSessionFactoryException;
+import br.com.anteros.security.model.Security;
 
 public class SpringSQLSessionFactoryBean implements FactoryBean<SQLSessionFactory>, InitializingBean {
 
@@ -17,6 +25,8 @@ public class SpringSQLSessionFactoryBean implements FactoryBean<SQLSessionFactor
 	protected Class<?>[] annotatedClasses;
 	protected Properties properties;
 	protected DataSource dataSource;
+	protected String packageToScanEntity;
+	protected boolean includeSecurityModel = false;
 
 	public void setAnnotatedClasses(Class<?>[] annotatedClasses) {
 		this.annotatedClasses = annotatedClasses;
@@ -49,13 +59,19 @@ public class SpringSQLSessionFactoryBean implements FactoryBean<SQLSessionFactor
 		return this.properties;
 	}
 
-
 	protected void buildSessionFactory() throws Exception {
 		SpringSQLConfiguration configuration = new SpringSQLConfiguration(this.getDataSource());
-		List<Class<?>> result = Arrays.asList(getAnnotatedClasses());
+		List<Class<?>> result = new ArrayList<Class<?>>();
+		if (getAnnotatedClasses() != null) {
+			result.addAll(Arrays.asList(getAnnotatedClasses()));
+		}
+
 		for (Class<?> sourceClass : result) {
 			configuration.addAnnotatedClass(sourceClass);
 		}
+		configuration.getSessionFactoryConfiguration().setPackageToScanEntity(
+				new PackageScanEntity().setPackageName(packageToScanEntity));
+		configuration.getSessionFactoryConfiguration().setIncludeSecurityModel(includeSecurityModel);
 		configuration.setProperties(this.getProperties());
 		sessionFactory = configuration.buildSessionFactory();
 	}
@@ -70,6 +86,30 @@ public class SpringSQLSessionFactoryBean implements FactoryBean<SQLSessionFactor
 
 	public Class<?>[] getAnnotatedClasses() {
 		return annotatedClasses;
+	}
+
+	public SQLSessionFactory getSessionFactory() {
+		return sessionFactory;
+	}
+
+	public void setSessionFactory(SQLSessionFactory sessionFactory) {
+		this.sessionFactory = sessionFactory;
+	}
+
+	public String getPackageToScanEntity() {
+		return packageToScanEntity;
+	}
+
+	public void setPackageToScanEntity(String packageToScanEntity) {
+		this.packageToScanEntity = packageToScanEntity;
+	}
+
+	public boolean isIncludeSecurityModel() {
+		return includeSecurityModel;
+	}
+
+	public void setIncludeSecurityModel(boolean includeSecurityModel) {
+		this.includeSecurityModel = includeSecurityModel;
 	}
 
 }
