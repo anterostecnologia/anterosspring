@@ -388,11 +388,9 @@ public class AnterosTransactionManager extends AbstractPlatformTransactionManage
 						+ "] after transaction");
 			}
 			if (!this.managedSession) {
-				try {
-					session.close();
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
+				/*
+				 * Quando implementar método para desconectar session chamar aqui.
+				 */
 			}
 		}
 		txObject.getSessionHolder().clear();
