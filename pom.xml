@@ -15,12 +15,12 @@
 		<dependency>
 			<groupId>br.com.anteros</groupId>
 			<artifactId>Anteros-Persistence</artifactId>
-			<version>0.0.5-SNAPSHOT</version>
+			<version>LATEST</version>
 		</dependency>
 		<dependency>
 			<groupId>br.com.anteros</groupId>
 			<artifactId>Anteros-Security</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>LATEST</version>
 		</dependency>
 
 		<!-- SPRING -->
