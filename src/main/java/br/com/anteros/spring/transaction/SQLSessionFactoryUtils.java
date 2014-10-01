@@ -133,6 +133,7 @@ public abstract class SQLSessionFactoryUtils {
 
 		logger.debug("Opening Anteros Session");
 		SQLSession session = sessionFactory.openSession();
+		logger.debug("Opened session");
 
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			logger.debug("Registering Spring transaction synchronization for new Anteros SQLSession");
@@ -162,6 +163,7 @@ public abstract class SQLSessionFactoryUtils {
             throw new IllegalStateException(AnterosSpringTranslate.getInstance().getMessage(SQLSessionFactoryUtils.class, "NoSessionBoundToThread"));
 		}
 
+		logger.debug("Return session opened");
 		return session;
 	}
 
