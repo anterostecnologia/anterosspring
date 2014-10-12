@@ -160,7 +160,7 @@ public abstract class SQLSessionFactoryUtils {
 
 		if (!allowCreate && !isSessionTransactional(session, sessionFactory)) {
 			closeSession(session);
-            throw new IllegalStateException(AnterosSpringTranslate.getInstance().getMessage(SQLSessionFactoryUtils.class, "NoSessionBoundToThread"));
+            throw new IllegalStateException(AnterosSpringTranslate.getMessage(SQLSessionFactoryUtils.class, "NoSessionBoundToThread"));
 		}
 
 		logger.debug("Return session opened");
