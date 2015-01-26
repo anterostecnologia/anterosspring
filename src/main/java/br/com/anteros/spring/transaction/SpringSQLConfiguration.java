@@ -17,7 +17,7 @@ package br.com.anteros.spring.transaction;
 
 import javax.sql.DataSource;
 
-import br.com.anteros.persistence.metadata.configuration.ModelConfiguration;
+import br.com.anteros.persistence.metadata.configuration.PersistenceModelConfiguration;
 import br.com.anteros.persistence.session.SQLSessionFactory;
 import br.com.anteros.persistence.session.configuration.AnterosPersistenceConfiguration;
 
@@ -27,11 +27,11 @@ public class SpringSQLConfiguration extends AnterosPersistenceConfiguration {
 		super(dataSource);
 	}
 
-	public SpringSQLConfiguration(ModelConfiguration modelConfiguration) {
+	public SpringSQLConfiguration(PersistenceModelConfiguration modelConfiguration) {
 		super(modelConfiguration);
 	}
 
-	public SpringSQLConfiguration(DataSource dataSource, ModelConfiguration modelConfiguration) {
+	public SpringSQLConfiguration(DataSource dataSource, PersistenceModelConfiguration modelConfiguration) {
 		super(dataSource, modelConfiguration);
 	}
 
@@ -39,9 +39,9 @@ public class SpringSQLConfiguration extends AnterosPersistenceConfiguration {
 	public SQLSessionFactory buildSessionFactory() throws Exception {
 		prepareClassesToLoad();
 		buildDataSource();		
-		loadEntities();
 		SpringSQLSessionFactoryImpl sessionFactory = new SpringSQLSessionFactoryImpl(entityCacheManager, dataSource,
 				this.getSessionFactoryConfiguration());
+		loadEntities(sessionFactory.getDialect());		
 		sessionFactory.generateDDL();
 		return sessionFactory;
 	}
