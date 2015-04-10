@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package br.com.anteros.spring.util;
+package br.com.anteros.spring.translation;
 
-import br.com.anteros.core.utils.AbstractCoreTranslate;
+import br.com.anteros.core.translation.AbstractCoreTranslate;
+import br.com.anteros.core.translation.TranslateMessage;
+import br.com.anteros.persistence.translation.AnterosPersistenceCoreTranslateMessages;
 
 /**
  * Classe de tradução/internacionalização de mensagens AnterosSpring.
@@ -25,14 +27,18 @@ import br.com.anteros.core.utils.AbstractCoreTranslate;
  */
 public class AnterosSpringTranslate extends AbstractCoreTranslate {
 
-	
-	private AnterosSpringTranslate(String messageBundleName) {
-		super(messageBundleName);
-	}
-	
 
-	static {
-		setInstance(new AnterosSpringTranslate("anterosspring_messages"));
+	private static AnterosSpringTranslate singleton;
+
+	public static AnterosSpringTranslate getInstance() {
+        if ( singleton == null )
+            singleton = new AnterosSpringTranslate(AnterosPersistenceCoreTranslateMessages.class);
+
+        return (AnterosSpringTranslate) singleton;
+    }    
+	
+	public AnterosSpringTranslate(Class<? extends TranslateMessage> translateClass) {
+		super(translateClass);
 	}
 
 }

@@ -41,7 +41,8 @@ import br.com.anteros.persistence.session.AbstractSQLSessionFactory;
 import br.com.anteros.persistence.session.SQLSession;
 import br.com.anteros.persistence.session.SQLSessionFactory;
 import br.com.anteros.persistence.session.query.SQLQuery;
-import br.com.anteros.spring.util.AnterosSpringTranslate;
+import br.com.anteros.persistence.translation.AnterosPersistenceTranslate;
+import br.com.anteros.spring.translation.AnterosSpringTranslate;
 
 /**
  * Classe utilitária para {@link SQLSessionFactory}.
@@ -55,6 +56,8 @@ public abstract class SQLSessionFactoryUtils {
 			DataSourceUtils.CONNECTION_SYNCHRONIZATION_ORDER - 100;
 
 	static final Log logger = LogFactory.getLog(SQLSessionFactoryUtils.class);
+	
+	private static AnterosSpringTranslate TRANSLATOR = AnterosSpringTranslate.getInstance();
 
 	private static final ThreadLocal<Map<SQLSessionFactory, Set<SQLSession>>> deferredCloseHolder =
 			new NamedThreadLocal<Map<SQLSessionFactory, Set<SQLSession>>>("Anteros Sessions registered for deferred close");
@@ -180,7 +183,7 @@ public abstract class SQLSessionFactoryUtils {
 
 		if (!allowCreate && !isSessionTransactional(session, sessionFactory)) {
 			closeSession(session);
-            throw new IllegalStateException(AnterosSpringTranslate.getMessage(SQLSessionFactoryUtils.class, "NoSessionBoundToThread"));
+            throw new IllegalStateException(TRANSLATOR.getMessage(SQLSessionFactoryUtils.class, "NoSessionBoundToThread"));
 		}
 
 		logger.debug("Return session opened");
