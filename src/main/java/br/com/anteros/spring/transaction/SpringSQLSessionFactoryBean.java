@@ -25,14 +25,8 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
-import br.com.anteros.core.configuration.PackageScanEntity;
-import br.com.anteros.core.scanner.ClassFilter;
-import br.com.anteros.core.scanner.ClassPathScanner;
-import br.com.anteros.core.utils.StringUtils;
-import br.com.anteros.persistence.metadata.annotation.Entity;
 import br.com.anteros.persistence.session.SQLSessionFactory;
-import br.com.anteros.persistence.session.exception.SQLSessionFactoryException;
-import br.com.anteros.security.model.Security;
+import br.com.anteros.persistence.session.configuration.PackageScanEntity;
 
 /**
  * Implementação de FactoryBean do Spring para criação da fábrica de sessões {@link SQLSessionFactory} do Anteros.
@@ -91,7 +85,7 @@ public class SpringSQLSessionFactoryBean implements FactoryBean<SQLSessionFactor
 			configuration.addAnnotatedClass(sourceClass);
 		}
 		configuration.getSessionFactoryConfiguration().setPackageToScanEntity(
-				new PackageScanEntity().setPackageName(packageToScanEntity));
+				new PackageScanEntity(packageToScanEntity));
 		configuration.getSessionFactoryConfiguration().setIncludeSecurityModel(includeSecurityModel);
 		configuration.setProperties(this.getProperties());
 		sessionFactory = configuration.buildSessionFactory();
