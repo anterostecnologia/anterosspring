@@ -144,7 +144,7 @@ public class SpringSQLSessionFactoryImpl extends AbstractSQLSessionFactory {
 		setConfigurationClientInfo(connection);
 		return new SQLSessionImpl(this, connection, this.getEntityCacheManager(),
 				new SQLQueryRunner(), this.getDialect(), this.isShowSql(), this.isFormatSql(),
-				this.getQueryTimeout(), this.getLockTimeout(), getTransactionFactory());
+				this.getQueryTimeout(), this.getLockTimeout(), getTransactionFactory(), this.getBatchSize());
 	}
 
 }
