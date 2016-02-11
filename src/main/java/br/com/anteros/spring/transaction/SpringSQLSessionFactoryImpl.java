@@ -143,7 +143,7 @@ public class SpringSQLSessionFactoryImpl extends AbstractSQLSessionFactory {
 	public SQLSession openSession(Connection connection) throws Exception {
 		setConfigurationClientInfo(connection);
 		return new SQLSessionImpl(this, connection, this.getEntityCacheManager(),
-				new SQLQueryRunner(), this.getDialect(), this.isShowSql(), this.isFormatSql(),
+				new SQLQueryRunner(), this.getDialect(), this.getShowSql(), this.isFormatSql(),
 				this.getQueryTimeout(), this.getLockTimeout(), getTransactionFactory(), this.getBatchSize());
 	}
 
