@@ -19,7 +19,7 @@ public class PooledDataSourceConfiguration {
 
 	private String jdbcUrl;
 
-	private String user;
+	private String user; 
 
 	private String password;
 
