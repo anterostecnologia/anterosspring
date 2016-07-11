@@ -34,6 +34,8 @@ public class AnterosSpringMessages implements AnterosBundle {
 		messages.put("EventSetDescriptor.IntrospectionException2", "M\u00e9todo {0} n\u00e3o encontrado na classe {1}");
 
 		messages.put("IndexedPropertyDescriptor.IntrospectionException", "M\u00e9todo {0} n\u00e3o encontrado");
+		
+		messages.put("SQLSessionFactoryUtils.NoSessionBoundToThread", "No Anteros SQLSession bound to thread, and configuration does not allow creation of non-transactional one here.");
 	}
 
 	@Override
