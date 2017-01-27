@@ -44,6 +44,12 @@ public abstract class AnterosSpringPersistenceConfiguration {
 					sqlSessionFactoryConfiguration.getDatabaseDdlGeneration());
 			configuration.addProperty(AnterosPersistenceProperties.DDL_OUTPUT_MODE,
 					sqlSessionFactoryConfiguration.getDdlOutputMode());
+			configuration.addProperty(AnterosPersistenceProperties.APPLICATION_LOCATION,
+					sqlSessionFactoryConfiguration.getApplicationLocation());
+			configuration.addProperty(AnterosPersistenceProperties.CREATE_TABLES_FILENAME,
+					sqlSessionFactoryConfiguration.getCreateTablesFileName());
+			configuration.addProperty(AnterosPersistenceProperties.DROP_TABLES_FILENAME,
+					sqlSessionFactoryConfiguration.getDropTablesFileName());
 			return configuration.buildSessionFactory();
 		}
 		return null;

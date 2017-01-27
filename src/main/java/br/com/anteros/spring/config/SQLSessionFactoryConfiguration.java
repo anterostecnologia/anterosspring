@@ -17,6 +17,9 @@ public class SQLSessionFactoryConfiguration {
 	private String jdbcSchema = "";
 	private String databaseDdlGeneration = "none";
 	private String ddlOutputMode = "none";
+	private String applicationLocation = "";
+	private String createTablesFileName = "";
+	private String dropTablesFileName = "";	
 
 	private SQLSessionFactoryConfiguration() {
 
@@ -104,6 +107,33 @@ public class SQLSessionFactoryConfiguration {
 
 	public SQLSessionFactoryConfiguration ddlOutputMode(String ddlOutputMode) {
 		this.ddlOutputMode = ddlOutputMode;
+		return this;
+	}
+
+	public String getApplicationLocation() {
+		return applicationLocation;
+	}
+
+	public SQLSessionFactoryConfiguration applicationLocation(String applicationLocation) {
+		this.applicationLocation = applicationLocation;
+		return this;
+	}
+
+	public String getCreateTablesFileName() {
+		return createTablesFileName;
+	}
+
+	public SQLSessionFactoryConfiguration createTablesFileName(String createTablesFileName) {
+		this.createTablesFileName = createTablesFileName;
+		return this;
+	}
+
+	public String getDropTablesFileName() {
+		return dropTablesFileName;
+	}
+
+	public SQLSessionFactoryConfiguration dropTablesFileName(String dropTablesFileName) {
+		this.dropTablesFileName = dropTablesFileName;
 		return this;
 	}
 
