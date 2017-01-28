@@ -15,7 +15,8 @@ public class SQLSessionFactoryConfiguration {
 	private ShowSQLType[] showSql = { ShowSQLType.NONE };
 	private boolean formatSql = true;
 	private String jdbcSchema = "";
-	private String databaseDdlGeneration = "none";
+	private String databaseDDLGeneration = "none";
+	private String scriptDDLGeneration = "none";
 	private String ddlOutputMode = "none";
 	private String applicationLocation = "";
 	private String createTablesFileName = "";
@@ -92,16 +93,25 @@ public class SQLSessionFactoryConfiguration {
 		return this;
 	}
 
-	public String getDatabaseDdlGeneration() {
-		return databaseDdlGeneration;
+	public String getDatabaseDDLGeneration() {
+		return databaseDDLGeneration;
 	}
 
-	public SQLSessionFactoryConfiguration databaseDdlGeneration(String databaseDdlGeneration) {
-		this.databaseDdlGeneration = databaseDdlGeneration;
+	public SQLSessionFactoryConfiguration databaseDDLGeneration(String databaseDDLGeneration) {
+		this.databaseDDLGeneration = databaseDDLGeneration;
+		return this;
+	}
+	
+	public String getScriptDDLGeneration() {
+		return scriptDDLGeneration;
+	}
+
+	public SQLSessionFactoryConfiguration scriptDDLGeneration(String scriptDDLGeneration) {
+		this.scriptDDLGeneration = scriptDDLGeneration;
 		return this;
 	}
 
-	public String getDdlOutputMode() {
+	public String getDDLOutputMode() {
 		return ddlOutputMode;
 	}
 

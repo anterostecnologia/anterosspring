@@ -32,7 +32,7 @@ public abstract class AnterosSpringPersistenceConfiguration {
 			}
 			configuration.getSessionFactoryConfiguration()
 					.setPackageToScanEntity(sqlSessionFactoryConfiguration.getPackageScanEntity());
-			configuration.getSessionFactoryConfiguration().setIncludeSecurityModel(true);
+			configuration.getSessionFactoryConfiguration().setIncludeSecurityModel(sqlSessionFactoryConfiguration.isIncludeSecurityModel());
 			configuration.addProperty(AnterosPersistenceProperties.DIALECT, sqlSessionFactoryConfiguration.getDialect());
 			configuration.addProperty(AnterosPersistenceProperties.SHOW_SQL,
 					ShowSQLType.parse(sqlSessionFactoryConfiguration.getShowSql()));
@@ -41,9 +41,11 @@ public abstract class AnterosSpringPersistenceConfiguration {
 			configuration.addProperty(AnterosPersistenceProperties.JDBC_SCHEMA,
 					sqlSessionFactoryConfiguration.getJdbcSchema());
 			configuration.addProperty(AnterosPersistenceProperties.DATABASE_DDL_GENERATION,
-					sqlSessionFactoryConfiguration.getDatabaseDdlGeneration());
+					sqlSessionFactoryConfiguration.getDatabaseDDLGeneration());
+			configuration.addProperty(AnterosPersistenceProperties.SCRIPT_DDL_GENERATION,
+					sqlSessionFactoryConfiguration.getScriptDDLGeneration());
 			configuration.addProperty(AnterosPersistenceProperties.DDL_OUTPUT_MODE,
-					sqlSessionFactoryConfiguration.getDdlOutputMode());
+					sqlSessionFactoryConfiguration.getDDLOutputMode());
 			configuration.addProperty(AnterosPersistenceProperties.APPLICATION_LOCATION,
 					sqlSessionFactoryConfiguration.getApplicationLocation());
 			configuration.addProperty(AnterosPersistenceProperties.CREATE_TABLES_FILENAME,
