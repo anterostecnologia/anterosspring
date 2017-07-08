@@ -214,5 +214,12 @@ public class SpringTransactionalSQLService<T, ID extends Serializable> extends G
 		return super.count(predicate);
 	}
 	
+	@Override
+	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
+	public String getTableName() throws Exception {
+		return super.getTableName();
+	}
+
+	
 
 }

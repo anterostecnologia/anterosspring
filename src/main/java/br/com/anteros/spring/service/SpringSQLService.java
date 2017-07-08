@@ -183,5 +183,11 @@ public class SpringSQLService<T, ID extends Serializable> extends GenericSQLServ
 		return super.count(predicate);
 	}
 	
+	@Override
+	public String getTableName() throws Exception {
+		return super.getTableName();
+	}
+
+	
 
 }
