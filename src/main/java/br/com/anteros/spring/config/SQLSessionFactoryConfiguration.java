@@ -21,6 +21,7 @@ public class SQLSessionFactoryConfiguration {
 	private String applicationLocation = "";
 	private String createTablesFileName = "";
 	private String dropTablesFileName = "";	
+	private Long lockTimeout = 0L;
 
 	private SQLSessionFactoryConfiguration() {
 
@@ -144,6 +145,15 @@ public class SQLSessionFactoryConfiguration {
 
 	public SQLSessionFactoryConfiguration dropTablesFileName(String dropTablesFileName) {
 		this.dropTablesFileName = dropTablesFileName;
+		return this;
+	}
+
+	public Long getLockTimeout() {
+		return lockTimeout;
+	}
+
+	public SQLSessionFactoryConfiguration lockTimeout(Long lockTimeout) {
+		this.lockTimeout = lockTimeout;
 		return this;
 	}
 

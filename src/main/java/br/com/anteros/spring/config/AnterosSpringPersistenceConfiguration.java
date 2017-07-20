@@ -52,6 +52,7 @@ public abstract class AnterosSpringPersistenceConfiguration {
 					sqlSessionFactoryConfiguration.getCreateTablesFileName());
 			configuration.addProperty(AnterosPersistenceProperties.DROP_TABLES_FILENAME,
 					sqlSessionFactoryConfiguration.getDropTablesFileName());
+			configuration.addProperty(AnterosPersistenceProperties.LOCK_TIMEOUT, sqlSessionFactoryConfiguration.getLockTimeout()+"");
 			return configuration.buildSessionFactory();
 		}
 		return null;
