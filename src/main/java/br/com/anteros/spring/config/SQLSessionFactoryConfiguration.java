@@ -10,10 +10,10 @@ public class SQLSessionFactoryConfiguration {
 
 	private List<Class<?>> entitySourceClasses = new ArrayList<Class<?>>();
 	private PackageScanEntity packageScanEntity = null;
-	private boolean includeSecurityModel = true;
+	private Boolean includeSecurityModel = true;
 	private String dialect;
 	private ShowSQLType[] showSql = { ShowSQLType.NONE };
-	private boolean formatSql = true;
+	private Boolean formatSql = true;
 	private String jdbcSchema = "";
 	private String databaseDDLGeneration = "none";
 	private String scriptDDLGeneration = "none";
@@ -22,6 +22,7 @@ public class SQLSessionFactoryConfiguration {
 	private String createTablesFileName = "";
 	private String dropTablesFileName = "";	
 	private Long lockTimeout = 0L;
+	private Boolean useBeanValidation = true;
 
 	private SQLSessionFactoryConfiguration() {
 
@@ -154,6 +155,15 @@ public class SQLSessionFactoryConfiguration {
 
 	public SQLSessionFactoryConfiguration lockTimeout(Long lockTimeout) {
 		this.lockTimeout = lockTimeout;
+		return this;
+	}
+
+	public Boolean getUseBeanValidation() {
+		return useBeanValidation;
+	}
+
+	public SQLSessionFactoryConfiguration useBeanValidation(Boolean useBeanValidation) {
+		this.useBeanValidation = useBeanValidation;
 		return this;
 	}
 
