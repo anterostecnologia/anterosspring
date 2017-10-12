@@ -19,7 +19,7 @@ public class PooledDataSourceConfiguration {
 
 	private String jdbcUrl;
 
-	private String user; 
+	private String user;
 
 	private String password;
 
@@ -34,6 +34,18 @@ public class PooledDataSourceConfiguration {
 	private int maxIdleTime = 5000;
 
 	private int idleConnectionTestPeriod = 5000;
+
+	private String preferredTestQuery;
+	
+	private boolean testConnectionOnCheckout;
+	
+	private boolean testConnectionOnCheckin;
+	
+	private int maxConnectionAge = 14400;
+	
+	private int acquireRetryAttempts = 10;
+	
+	private String automaticTestTable = "TST_CONNECTION";
 
 	public String getDriverClass() {
 		return driverClass;
@@ -122,6 +134,61 @@ public class PooledDataSourceConfiguration {
 
 	public PooledDataSourceConfiguration idleConnectionTestPeriod(int idleConnectionTestPeriod) {
 		this.idleConnectionTestPeriod = idleConnectionTestPeriod;
+		return this;
+	}
+
+	public String getPreferredTestQuery() {
+		return preferredTestQuery;
+	}
+
+	public PooledDataSourceConfiguration preferredTestQuery(String preferredTestQuery) {
+		this.preferredTestQuery = preferredTestQuery;
+		return this;
+	}
+
+
+	public boolean isTestConnectionOnCheckout() {
+		return testConnectionOnCheckout;
+	}
+
+	public PooledDataSourceConfiguration testConnectionOnCheckout(boolean testConnectionOnCheckout) {
+		this.testConnectionOnCheckout = testConnectionOnCheckout;
+		return this;
+	}
+
+	public boolean isTestConnectionOnCheckin() {
+		return testConnectionOnCheckin;
+	}
+
+	public PooledDataSourceConfiguration testConnectionOnCheckin(boolean testConnectionOnCheckin) {
+		this.testConnectionOnCheckin = testConnectionOnCheckin;
+		return this;
+	}
+
+	public int getMaxConnectionAge() {
+		return maxConnectionAge;
+	}
+
+	public PooledDataSourceConfiguration maxConnectionAge(int maxConnectionAge) {
+		this.maxConnectionAge = maxConnectionAge;
+		return this;
+	}
+
+	public int getAcquireRetryAttempts() {
+		return acquireRetryAttempts;
+	}
+
+	public PooledDataSourceConfiguration acquireRetryAttempts(int acquireRetryAttempts) {
+		this.acquireRetryAttempts = acquireRetryAttempts;
+		return this;
+	}
+
+	public String getAutomaticTestTable() {
+		return automaticTestTable;
+	}
+
+	public PooledDataSourceConfiguration automaticTestTable(String automaticTestTable) {
+		this.automaticTestTable = automaticTestTable;
 		return this;
 	}
 

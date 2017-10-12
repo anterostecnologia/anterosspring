@@ -76,6 +76,12 @@ public abstract class AnterosSpringPersistenceConfiguration {
 			dataSource.setMaxIdleTime(Integer.valueOf(pooledDataSourceConfiguration.getMaxIdleTime()));
 			dataSource.setIdleConnectionTestPeriod(
 					Integer.valueOf(pooledDataSourceConfiguration.getIdleConnectionTestPeriod()));
+			dataSource.setAcquireRetryAttempts(pooledDataSourceConfiguration.getAcquireRetryAttempts());
+			dataSource.setMaxConnectionAge(pooledDataSourceConfiguration.getMaxConnectionAge());
+			dataSource.setAutomaticTestTable(pooledDataSourceConfiguration.getAutomaticTestTable());
+			dataSource.setPreferredTestQuery(pooledDataSourceConfiguration.getPreferredTestQuery());
+			dataSource.setTestConnectionOnCheckin(pooledDataSourceConfiguration.isTestConnectionOnCheckin());
+			dataSource.setTestConnectionOnCheckout(pooledDataSourceConfiguration.isTestConnectionOnCheckout());
 			return dataSource;
 		} else if (getSingleDataSourceConfiguration() != null) {
 			SingleDataSourceConfiguration singleDataSourceConfiguration = getSingleDataSourceConfiguration();
