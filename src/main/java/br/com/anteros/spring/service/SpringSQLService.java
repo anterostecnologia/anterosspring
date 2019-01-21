@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import br.com.anteros.persistence.dsl.osql.types.OrderSpecifier;
 import br.com.anteros.persistence.dsl.osql.types.Predicate;
@@ -38,7 +39,7 @@ public class SpringSQLService<T, ID extends Serializable> extends GenericSQLServ
 
 	@Override
 	@Autowired 
-	public void setSessionFactory(SQLSessionFactory sessionFactory) {
+	public void setSessionFactory(@Qualifier("sessionFactorySQL") SQLSessionFactory sessionFactory) {
 		super.setSessionFactory(sessionFactory);
 	}
 	

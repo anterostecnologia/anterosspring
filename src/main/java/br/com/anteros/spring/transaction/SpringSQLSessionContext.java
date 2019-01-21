@@ -39,7 +39,7 @@ public class SpringSQLSessionContext implements CurrentSQLSessionContext {
 	@Override
 	public SQLSession currentSession() throws Exception {
 		try {
-			return (SQLSession) SQLSessionFactoryUtils.doGetSession(this.sessionFactory, false);
+			return (SQLSession) SQLSessionFactoryUtils.doGetSession(this.sessionFactory, true);
 		}
 		catch (IllegalStateException ex) {
 			throw new Exception(ex.getMessage());
