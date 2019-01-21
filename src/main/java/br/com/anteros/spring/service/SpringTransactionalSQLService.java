@@ -27,7 +27,8 @@ import br.com.anteros.persistence.dsl.osql.types.Predicate;
 import br.com.anteros.persistence.session.SQLSessionFactory;
 import br.com.anteros.persistence.session.repository.Page;
 import br.com.anteros.persistence.session.repository.Pageable;
-import br.com.anteros.persistence.session.service.SimpleSQLService;
+import br.com.anteros.persistence.session.service.GenericSQLService;
+
 
 /**
  * 
@@ -37,7 +38,7 @@ import br.com.anteros.persistence.session.service.SimpleSQLService;
  * @param <ID>
  */
 @Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
-public class SpringTransactionalSQLService<T, ID extends Serializable> extends SimpleSQLService<T, ID> {
+public class SpringTransactionalSQLService<T, ID extends Serializable> extends GenericSQLService<T, ID> {
 
 	@Override
 	@Autowired 
