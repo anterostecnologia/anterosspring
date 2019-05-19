@@ -29,6 +29,7 @@ import br.com.anteros.persistence.session.SQLSession;
 import br.com.anteros.persistence.session.configuration.AnterosPersistenceProperties;
 import br.com.anteros.persistence.session.configuration.SessionFactoryConfiguration;
 import br.com.anteros.persistence.session.context.CurrentSQLSessionContext;
+import br.com.anteros.persistence.session.context.ThreadLocalSQLSessionContext;
 import br.com.anteros.persistence.session.exception.SQLSessionException;
 import br.com.anteros.persistence.session.impl.SQLQueryRunner;
 import br.com.anteros.persistence.session.impl.SQLSessionFactoryImpl;
@@ -81,7 +82,8 @@ public class SpringSQLSessionFactoryImpl extends AbstractSQLSessionFactory {
 		if ( currentSessionContext == null ) {
 			throw new SQLSessionException( "No CurrentSessionContext configured!" );
 		}
-		return currentSessionContext.currentSession();
+		SQLSession session = currentSessionContext.currentSession();
+		return session;
 	}
 
 	@Override
@@ -95,7 +97,7 @@ public class SpringSQLSessionFactoryImpl extends AbstractSQLSessionFactory {
 	}
 
 	public SQLSession openSession() throws Exception {
-		return openSession(this.getDatasource().getConnection());
+		return openSession(this.getDataSource().getConnection());
 	}
 	
 	

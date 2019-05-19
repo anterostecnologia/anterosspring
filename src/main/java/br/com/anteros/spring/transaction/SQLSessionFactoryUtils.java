@@ -67,7 +67,7 @@ public abstract class SQLSessionFactoryUtils {
 
 	public static DataSource getDataSource(SQLSessionFactory sessionFactory) {
 		if (sessionFactory instanceof AbstractSQLSessionFactory) {
-			return ((AbstractSQLSessionFactory) sessionFactory).getDatasource();
+			return ((AbstractSQLSessionFactory) sessionFactory).getDataSource();
 		}
 		return null;
 	}
