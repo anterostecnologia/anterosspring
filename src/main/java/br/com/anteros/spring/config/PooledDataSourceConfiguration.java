@@ -2,7 +2,7 @@ package br.com.anteros.spring.config;
 
 public class PooledDataSourceConfiguration {
 
-	private PooledDataSourceConfiguration() {
+	protected PooledDataSourceConfiguration() {
 
 	}
 
