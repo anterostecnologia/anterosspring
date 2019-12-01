@@ -25,6 +25,7 @@ import br.com.anteros.core.log.LoggerProvider;
 import br.com.anteros.core.utils.ReflectionUtils;
 import br.com.anteros.persistence.metadata.EntityCacheManager;
 import br.com.anteros.persistence.session.AbstractSQLSessionFactory;
+import br.com.anteros.persistence.session.ExternalFileManager;
 import br.com.anteros.persistence.session.SQLSession;
 import br.com.anteros.persistence.session.configuration.AnterosPersistenceProperties;
 import br.com.anteros.persistence.session.configuration.SessionFactoryConfiguration;
@@ -52,9 +53,9 @@ public class SpringSQLSessionFactoryImpl extends AbstractSQLSessionFactory {
 	private TransactionManager transactionManager;
 
 	public SpringSQLSessionFactoryImpl(EntityCacheManager entityCacheManager, DataSource dataSource,
-			SessionFactoryConfiguration configuration)
+			SessionFactoryConfiguration configuration, ExternalFileManager externalFileManager)
 			throws Exception {
-		super(entityCacheManager, dataSource, configuration);
+		super(entityCacheManager, dataSource, configuration, externalFileManager);
 		String tmLookupClass = configuration.getProperty(AnterosPersistenceProperties.TRANSACTION_MANAGER_LOOKUP);
 		if (tmLookupClass == null) {
 			log.info("No TransactionManagerLookup configured (in JTA environment, use of read-write or transactional second-level cache is not recommended)");
@@ -146,7 +147,7 @@ public class SpringSQLSessionFactoryImpl extends AbstractSQLSessionFactory {
 		setConfigurationClientInfo(connection);
 		return new SQLSessionImpl(this, connection, this.getEntityCacheManager(),
 				new SQLQueryRunner(), this.getDialect(), this.getShowSql(), this.isFormatSql(),
-				this.getQueryTimeout(), this.getLockTimeout(), getTransactionFactory(), this.getBatchSize(), this.isUseBeanValidation());
+				this.getQueryTimeout(), this.getLockTimeout(), getTransactionFactory(), this.getBatchSize(), this.isUseBeanValidation(), this.externalFileManager);
 	}
 
 }

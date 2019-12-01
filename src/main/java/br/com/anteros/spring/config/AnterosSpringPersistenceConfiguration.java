@@ -26,7 +26,7 @@ public abstract class AnterosSpringPersistenceConfiguration {
 		SQLSessionFactoryConfiguration sqlSessionFactoryConfiguration = getSQLSessionFactoryConfiguration();
 		if (sqlSessionFactoryConfiguration != null) {
 			DataSource dataSource = dataSource();
-			SpringSQLConfiguration configuration = new SpringSQLConfiguration(dataSource);
+			SpringSQLConfiguration configuration = new SpringSQLConfiguration(dataSource, sqlSessionFactoryConfiguration.getExternalFileManager());
 			for (Class<?> sourceClass : sqlSessionFactoryConfiguration.getEntitySourceClasses()) {
 				configuration.addAnnotatedClass(sourceClass);
 			}

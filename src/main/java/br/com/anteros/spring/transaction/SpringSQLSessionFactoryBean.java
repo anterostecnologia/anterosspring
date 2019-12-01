@@ -25,6 +25,7 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
+import br.com.anteros.persistence.session.ExternalFileManager;
 import br.com.anteros.persistence.session.SQLSessionFactory;
 import br.com.anteros.persistence.session.configuration.PackageScanEntity;
 
@@ -42,6 +43,7 @@ public class SpringSQLSessionFactoryBean implements FactoryBean<SQLSessionFactor
 	protected DataSource dataSource;
 	protected String packageToScanEntity;
 	protected boolean includeSecurityModel = false;
+	protected ExternalFileManager externalFileManager;
 
 	public void setAnnotatedClasses(Class<?>[] annotatedClasses) {
 		this.annotatedClasses = annotatedClasses;
@@ -75,7 +77,7 @@ public class SpringSQLSessionFactoryBean implements FactoryBean<SQLSessionFactor
 	}
 
 	protected void buildSessionFactory() throws Exception {
-		SpringSQLConfiguration configuration = new SpringSQLConfiguration(this.getDataSource());
+		SpringSQLConfiguration configuration = new SpringSQLConfiguration(this.getDataSource(), this.externalFileManager);
 		List<Class<?>> result = new ArrayList<Class<?>>();
 		if (getAnnotatedClasses() != null) {
 			result.addAll(Arrays.asList(getAnnotatedClasses()));
@@ -125,6 +127,14 @@ public class SpringSQLSessionFactoryBean implements FactoryBean<SQLSessionFactor
 
 	public void setIncludeSecurityModel(boolean includeSecurityModel) {
 		this.includeSecurityModel = includeSecurityModel;
+	}
+
+	public ExternalFileManager getExternalFileManager() {
+		return externalFileManager;
+	}
+
+	public void setExternalFileManager(ExternalFileManager externalFileManager) {
+		this.externalFileManager = externalFileManager;
 	}
 
 }

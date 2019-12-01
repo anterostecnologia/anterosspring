@@ -1,8 +1,11 @@
 package br.com.anteros.spring.config;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
+import br.com.anteros.persistence.session.ExternalFileManager;
 import br.com.anteros.persistence.session.configuration.PackageScanEntity;
 import br.com.anteros.persistence.session.query.ShowSQLType;
 
@@ -23,6 +26,8 @@ public class SQLSessionFactoryConfiguration {
 	private String dropTablesFileName = "";	
 	private Long lockTimeout = 0L;
 	private Boolean useBeanValidation = true;
+	private ExternalFileManager externalFileManager;
+	private Map<Object, Class<?>> entityListeners = new LinkedHashMap<>();
 
 	private SQLSessionFactoryConfiguration() {
 
@@ -30,6 +35,11 @@ public class SQLSessionFactoryConfiguration {
 
 	public static SQLSessionFactoryConfiguration create() {
 		return new SQLSessionFactoryConfiguration();
+	}
+	
+	public SQLSessionFactoryConfiguration addEntityListener(Class<?> entity, Object listener) {
+		entityListeners.put(listener, entity);
+		return this;
 	}
 
 	public List<Class<?>> getEntitySourceClasses() {
@@ -165,6 +175,19 @@ public class SQLSessionFactoryConfiguration {
 	public SQLSessionFactoryConfiguration useBeanValidation(Boolean useBeanValidation) {
 		this.useBeanValidation = useBeanValidation;
 		return this;
+	}
+
+	public ExternalFileManager getExternalFileManager() {
+		return externalFileManager;
+	}
+
+	public SQLSessionFactoryConfiguration externalFileManager(ExternalFileManager externalFileManager) {
+		this.externalFileManager = externalFileManager;
+		return this;
+	}
+
+	public Map<Object, Class<?>> getEntityListeners() {
+		return entityListeners;
 	}
 
 }

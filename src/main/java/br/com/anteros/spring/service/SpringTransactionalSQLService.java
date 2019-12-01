@@ -72,8 +72,8 @@ public class SpringTransactionalSQLService<T, ID extends Serializable> extends G
 	
 	@Override
 	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = false)
-	public void refresh(T entity) {
-		super.refresh(entity);
+	public void refresh(T entity, String fieldsToForceLazy) {
+		super.refresh(entity, fieldsToForceLazy);
 	}
 	
 	@Override
@@ -103,8 +103,8 @@ public class SpringTransactionalSQLService<T, ID extends Serializable> extends G
 
 	@Override
 	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
-	public T findOne(ID id) {
-		return super.findOne(id);
+	public T findOne(ID id, String fieldsToForceLazy) {
+		return super.findOne(id, fieldsToForceLazy);
 	}
 
 	@Override
@@ -115,92 +115,92 @@ public class SpringTransactionalSQLService<T, ID extends Serializable> extends G
 
 	@Override
 	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
-	public List<T> findAll() {
-		return super.findAll();
+	public List<T> findAll(String fieldsToForceLazy) {
+		return super.findAll(fieldsToForceLazy);
 	}
 
 	@Override
 	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
-	public Page<T> findAll(Pageable pageable) {
-		return super.findAll(pageable);
+	public Page<T> findAll(Pageable pageable, String fieldsToForceLazy) {
+		return super.findAll(pageable, fieldsToForceLazy);
 	}
 
 	@Override
 	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
-	public List<T> find(String sql) {
-		return super.find(sql);
+	public List<T> find(String sql, String fieldsToForceLazy) {
+		return super.find(sql, fieldsToForceLazy);
 	}
 
 	@Override
 	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
-	public Page<T> find(String sql, Pageable pageable) {
-		return super.find(sql, pageable);
+	public Page<T> find(String sql, Pageable pageable, String fieldsToForceLazy) {
+		return super.find(sql, pageable, fieldsToForceLazy);
 	}
 
 	@Override
 	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
-	public List<T> find(String sql, Object parameters) {
-		return super.find(sql, parameters);
+	public List<T> find(String sql, Object parameters, String fieldsToForceLazy) {
+		return super.find(sql, parameters, fieldsToForceLazy);
 	}
 
 	@Override
 	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
-	public Page<T> find(String sql, Object parameters, Pageable pageable) {
-		return super.find(sql, parameters, pageable);
+	public Page<T> find(String sql, Object parameters, Pageable pageable, String fieldsToForceLazy) {
+		return super.find(sql, parameters, pageable, fieldsToForceLazy);
 	}
 
 	@Override
 	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
-	public List<T> findByNamedQuery(String queryName) {
-		return super.findByNamedQuery(queryName);
+	public List<T> findByNamedQuery(String queryName, String fieldsToForceLazy) {
+		return super.findByNamedQuery(queryName, fieldsToForceLazy);
 	}
 
 	@Override
 	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
-	public Page<T> findByNamedQuery(String queryName, Pageable pageable) {
-		return super.findByNamedQuery(queryName, pageable);
+	public Page<T> findByNamedQuery(String queryName, Pageable pageable, String fieldsToForceLazy) {
+		return super.findByNamedQuery(queryName, pageable, fieldsToForceLazy);
 	}
 
 	@Override
 	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
-	public List<T> findByNamedQuery(String queryName, Object parameters) {
-		return super.findByNamedQuery(queryName, parameters);
+	public List<T> findByNamedQuery(String queryName, Object parameters, String fieldsToForceLazy) {
+		return super.findByNamedQuery(queryName, parameters, fieldsToForceLazy);
 	}
 
 	@Override
 	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
-	public Page<T> findByNamedQuery(String queryName, Object parameters, Pageable pageable) {
-		return super.findByNamedQuery(queryName, parameters, pageable);
+	public Page<T> findByNamedQuery(String queryName, Object parameters, Pageable pageable, String fieldsToForceLazy) {
+		return super.findByNamedQuery(queryName, parameters, pageable, fieldsToForceLazy);
 	}
 
 	@Override
 	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
-	public T findOne(Predicate predicate) {
-		return super.findOne(predicate);
+	public T findOne(Predicate predicate, String fieldsToForceLazy) {
+		return super.findOne(predicate, fieldsToForceLazy);
 	}
 
 	@Override
 	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
-	public List<T> findAll(Predicate predicate) {
-		return super.findAll(predicate);
+	public List<T> findAll(Predicate predicate, String fieldsToForceLazy) {
+		return super.findAll(predicate, fieldsToForceLazy);
 	}
 
 	@Override
 	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
-	public Iterable<T> findAll(Predicate predicate, OrderSpecifier<?>... orders) {
-		return super.findAll(predicate, orders);
+	public Iterable<T> findAll(Predicate predicate, String fieldsToForceLazy, OrderSpecifier<?>... orders) {
+		return super.findAll(predicate, fieldsToForceLazy, orders);
 	}
 
 	@Override
 	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
-	public Page<T> findAll(Predicate predicate, Pageable pageable) {
-		return super.findAll(predicate, pageable);
+	public Page<T> findAll(Predicate predicate, Pageable pageable, String fieldsToForceLazy) {
+		return super.findAll(predicate, pageable, fieldsToForceLazy);
 	}
 
 	@Override
 	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
-	public Page<T> findAll(Predicate predicate, Pageable pageable, OrderSpecifier<?>... orders) {
-		return super.findAll(predicate, pageable, orders);
+	public Page<T> findAll(Predicate predicate, Pageable pageable, String fieldsToForceLazy, OrderSpecifier<?>... orders) {
+		return super.findAll(predicate, pageable, fieldsToForceLazy, orders);
 	}
 
 	@Override

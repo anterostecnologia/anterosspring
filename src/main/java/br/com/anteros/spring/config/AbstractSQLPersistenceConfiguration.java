@@ -9,11 +9,11 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import br.com.anteros.dbcp.AnterosDBCPConfig;
 import br.com.anteros.dbcp.AnterosDBCPDataSource;
+import br.com.anteros.persistence.metadata.annotation.EntityListeners;
 import br.com.anteros.persistence.session.SQLSessionFactory;
 import br.com.anteros.persistence.session.configuration.AnterosPersistenceProperties;
 import br.com.anteros.persistence.session.query.ShowSQLType;
 import br.com.anteros.spring.transaction.SpringSQLConfiguration;
-
 
 public abstract class AbstractSQLPersistenceConfiguration {
 
@@ -22,20 +22,23 @@ public abstract class AbstractSQLPersistenceConfiguration {
 	public abstract SingleDataSourceConfiguration getSingleDataSourceConfiguration();
 
 	public abstract SQLSessionFactoryConfiguration getSQLSessionFactoryConfiguration();
-	
+
 	@Bean
 	public SQLSessionFactory sessionFactorySQL() throws Exception {
 		SQLSessionFactoryConfiguration sqlSessionFactoryConfiguration = getSQLSessionFactoryConfiguration();
 		if (sqlSessionFactoryConfiguration != null) {
 			DataSource dataSource = dataSourceSQL();
-			SpringSQLConfiguration configuration = new SpringSQLConfiguration(dataSource);
+			SpringSQLConfiguration configuration = new SpringSQLConfiguration(dataSource,
+					sqlSessionFactoryConfiguration.getExternalFileManager());
 			for (Class<?> sourceClass : sqlSessionFactoryConfiguration.getEntitySourceClasses()) {
 				configuration.addAnnotatedClass(sourceClass);
 			}
 			configuration.getSessionFactoryConfiguration()
 					.setPackageToScanEntity(sqlSessionFactoryConfiguration.getPackageScanEntity());
-			configuration.getSessionFactoryConfiguration().setIncludeSecurityModel(sqlSessionFactoryConfiguration.isIncludeSecurityModel());
-			configuration.addProperty(AnterosPersistenceProperties.DIALECT, sqlSessionFactoryConfiguration.getDialect());
+			configuration.getSessionFactoryConfiguration()
+					.setIncludeSecurityModel(sqlSessionFactoryConfiguration.isIncludeSecurityModel());
+			configuration.addProperty(AnterosPersistenceProperties.DIALECT,
+					sqlSessionFactoryConfiguration.getDialect());
 			configuration.addProperty(AnterosPersistenceProperties.SHOW_SQL,
 					ShowSQLType.parse(sqlSessionFactoryConfiguration.getShowSql()));
 			configuration.addProperty(AnterosPersistenceProperties.FORMAT_SQL,
@@ -54,19 +57,25 @@ public abstract class AbstractSQLPersistenceConfiguration {
 					sqlSessionFactoryConfiguration.getCreateTablesFileName());
 			configuration.addProperty(AnterosPersistenceProperties.DROP_TABLES_FILENAME,
 					sqlSessionFactoryConfiguration.getDropTablesFileName());
-			configuration.addProperty(AnterosPersistenceProperties.LOCK_TIMEOUT, sqlSessionFactoryConfiguration.getLockTimeout()+"");
-			configuration.addProperty(AnterosPersistenceProperties.USE_BEAN_VALIDATION, sqlSessionFactoryConfiguration.getUseBeanValidation()+"");
+			configuration.addProperty(AnterosPersistenceProperties.LOCK_TIMEOUT,
+					sqlSessionFactoryConfiguration.getLockTimeout() + "");
+			configuration.addProperty(AnterosPersistenceProperties.USE_BEAN_VALIDATION,
+					sqlSessionFactoryConfiguration.getUseBeanValidation() + "");
+			for (Object listener : sqlSessionFactoryConfiguration.getEntityListeners().keySet()) {
+				Class<?> entity = sqlSessionFactoryConfiguration.getEntityListeners().get(listener);
+				configuration.addEntityListener(entity, listener);
+			}
 			return configuration.buildSessionFactory();
 		}
 		return null;
 	}
 
-
 	@Bean
 	public DataSource dataSourceSQL() throws Exception {
-		if (getPooledDataSourceConfiguration() != null && getPooledDataSourceConfiguration() instanceof AnterosDBCPDataSourceConfiguration) {
+		if (getPooledDataSourceConfiguration() != null
+				&& getPooledDataSourceConfiguration() instanceof AnterosDBCPDataSourceConfiguration) {
 			AnterosDBCPDataSourceConfiguration pooledDataSourceConfiguration = (AnterosDBCPDataSourceConfiguration) getPooledDataSourceConfiguration();
-			AnterosDBCPConfig config = new  AnterosDBCPConfig();
+			AnterosDBCPConfig config = new AnterosDBCPConfig();
 			config.setAutoCommit(false);
 			config.setDriverClassName(pooledDataSourceConfiguration.getDriverClass());
 			config.setJdbcUrl(pooledDataSourceConfiguration.getJdbcUrl());
@@ -78,7 +87,7 @@ public abstract class AbstractSQLPersistenceConfiguration {
 			config.setDataSourceProperties(pooledDataSourceConfiguration.getDataSourceProperties());
 			AnterosDBCPDataSource dataSource = new AnterosDBCPDataSource(config);
 			return dataSource;
-		} else if (getPooledDataSourceConfiguration() !=null) {	
+		} else if (getPooledDataSourceConfiguration() != null) {
 			PooledDataSourceConfiguration pooledDataSourceConfiguration = getPooledDataSourceConfiguration();
 			ComboPooledDataSource dataSource = new ComboPooledDataSource();
 			dataSource.setDriverClass(pooledDataSourceConfiguration.getDriverClass());
@@ -109,6 +118,5 @@ public abstract class AbstractSQLPersistenceConfiguration {
 		}
 		return null;
 	}
-	
 
 }

@@ -18,6 +18,7 @@ package br.com.anteros.spring.transaction;
 import javax.sql.DataSource;
 
 import br.com.anteros.persistence.metadata.configuration.PersistenceModelConfiguration;
+import br.com.anteros.persistence.session.ExternalFileManager;
 import br.com.anteros.persistence.session.SQLSessionFactory;
 import br.com.anteros.persistence.session.configuration.AnterosPersistenceConfiguration;
 
@@ -29,16 +30,16 @@ import br.com.anteros.persistence.session.configuration.AnterosPersistenceConfig
  */
 public class SpringSQLConfiguration extends AnterosPersistenceConfiguration {
 
-	public SpringSQLConfiguration(DataSource dataSource) {
-		super(dataSource);
+	public SpringSQLConfiguration(DataSource dataSource, ExternalFileManager externalFileManager) {
+		super(dataSource, externalFileManager);
 	}
 
-	public SpringSQLConfiguration(PersistenceModelConfiguration modelConfiguration) {
-		super(modelConfiguration);
+	public SpringSQLConfiguration(PersistenceModelConfiguration modelConfiguration, ExternalFileManager externalFileManager) {
+		super(modelConfiguration, externalFileManager);
 	}
 
-	public SpringSQLConfiguration(DataSource dataSource, PersistenceModelConfiguration modelConfiguration) {
-		super(dataSource, modelConfiguration);
+	public SpringSQLConfiguration(DataSource dataSource, PersistenceModelConfiguration modelConfiguration, ExternalFileManager externalFileManager) {
+		super(dataSource, modelConfiguration, externalFileManager);
 	}
 
 	@Override
@@ -46,7 +47,7 @@ public class SpringSQLConfiguration extends AnterosPersistenceConfiguration {
 		prepareClassesToLoad();
 		buildDataSource();		
 		SpringSQLSessionFactoryImpl sessionFactory = new SpringSQLSessionFactoryImpl(entityCacheManager, dataSource,
-				this.getSessionFactoryConfiguration());
+				this.getSessionFactoryConfiguration(), this.externalFileManager);
 		loadEntities(sessionFactory.getDialect());		
 		sessionFactory.generateDDL();
 		return sessionFactory;
