@@ -29,7 +29,7 @@ public abstract class AbstractSQLPersistenceConfiguration {
 		if (sqlSessionFactoryConfiguration != null) {
 			DataSource dataSource = dataSourceSQL();
 			SpringSQLConfiguration configuration = new SpringSQLConfiguration(dataSource,
-					sqlSessionFactoryConfiguration.getExternalFileManager());
+					sqlSessionFactoryConfiguration.getExternalFileManager(), sqlSessionFactoryConfiguration.isEnableImageCompression());
 			for (Class<?> sourceClass : sqlSessionFactoryConfiguration.getEntitySourceClasses()) {
 				configuration.addAnnotatedClass(sourceClass);
 			}

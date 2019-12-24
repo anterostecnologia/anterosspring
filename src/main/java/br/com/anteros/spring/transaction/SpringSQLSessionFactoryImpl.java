@@ -53,9 +53,9 @@ public class SpringSQLSessionFactoryImpl extends AbstractSQLSessionFactory {
 	private TransactionManager transactionManager;
 
 	public SpringSQLSessionFactoryImpl(EntityCacheManager entityCacheManager, DataSource dataSource,
-			SessionFactoryConfiguration configuration, ExternalFileManager externalFileManager)
+			SessionFactoryConfiguration configuration, ExternalFileManager externalFileManager, boolean enableImageCompression)
 			throws Exception {
-		super(entityCacheManager, dataSource, configuration, externalFileManager);
+		super(entityCacheManager, dataSource, configuration, externalFileManager, enableImageCompression);
 		String tmLookupClass = configuration.getProperty(AnterosPersistenceProperties.TRANSACTION_MANAGER_LOOKUP);
 		if (tmLookupClass == null) {
 			log.info("No TransactionManagerLookup configured (in JTA environment, use of read-write or transactional second-level cache is not recommended)");
@@ -147,7 +147,7 @@ public class SpringSQLSessionFactoryImpl extends AbstractSQLSessionFactory {
 		setConfigurationClientInfo(connection);
 		return new SQLSessionImpl(this, connection, this.getEntityCacheManager(),
 				new SQLQueryRunner(), this.getDialect(), this.getShowSql(), this.isFormatSql(),
-				this.getQueryTimeout(), this.getLockTimeout(), getTransactionFactory(), this.getBatchSize(), this.isUseBeanValidation(), this.externalFileManager);
+				this.getQueryTimeout(), this.getLockTimeout(), getTransactionFactory(), this.getBatchSize(), this.isUseBeanValidation(), this.externalFileManager, this.enableImageCompression);
 	}
 
 }

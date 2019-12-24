@@ -30,16 +30,16 @@ import br.com.anteros.persistence.session.configuration.AnterosPersistenceConfig
  */
 public class SpringSQLConfiguration extends AnterosPersistenceConfiguration {
 
-	public SpringSQLConfiguration(DataSource dataSource, ExternalFileManager externalFileManager) {
-		super(dataSource, externalFileManager);
+	public SpringSQLConfiguration(DataSource dataSource, ExternalFileManager externalFileManager, boolean enableImageCompression) {
+		super(dataSource, externalFileManager,enableImageCompression);
 	}
 
-	public SpringSQLConfiguration(PersistenceModelConfiguration modelConfiguration, ExternalFileManager externalFileManager) {
-		super(modelConfiguration, externalFileManager);
+	public SpringSQLConfiguration(PersistenceModelConfiguration modelConfiguration, ExternalFileManager externalFileManager, boolean enableImageCompression) {
+		super(modelConfiguration, externalFileManager,enableImageCompression);
 	}
 
-	public SpringSQLConfiguration(DataSource dataSource, PersistenceModelConfiguration modelConfiguration, ExternalFileManager externalFileManager) {
-		super(dataSource, modelConfiguration, externalFileManager);
+	public SpringSQLConfiguration(DataSource dataSource, PersistenceModelConfiguration modelConfiguration, ExternalFileManager externalFileManager, boolean enableImageCompression) {
+		super(dataSource, modelConfiguration, externalFileManager,enableImageCompression);
 	}
 
 	@Override
@@ -47,7 +47,7 @@ public class SpringSQLConfiguration extends AnterosPersistenceConfiguration {
 		prepareClassesToLoad();
 		buildDataSource();		
 		SpringSQLSessionFactoryImpl sessionFactory = new SpringSQLSessionFactoryImpl(entityCacheManager, dataSource,
-				this.getSessionFactoryConfiguration(), this.externalFileManager);
+				this.getSessionFactoryConfiguration(), this.externalFileManager, this.enableImageCompression);
 		loadEntities(sessionFactory.getDialect());		
 		sessionFactory.generateDDL();
 		return sessionFactory;

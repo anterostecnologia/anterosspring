@@ -44,6 +44,7 @@ public class SpringSQLSessionFactoryBean implements FactoryBean<SQLSessionFactor
 	protected String packageToScanEntity;
 	protected boolean includeSecurityModel = false;
 	protected ExternalFileManager externalFileManager;
+	protected boolean enableImageCompression;
 
 	public void setAnnotatedClasses(Class<?>[] annotatedClasses) {
 		this.annotatedClasses = annotatedClasses;
@@ -77,7 +78,7 @@ public class SpringSQLSessionFactoryBean implements FactoryBean<SQLSessionFactor
 	}
 
 	protected void buildSessionFactory() throws Exception {
-		SpringSQLConfiguration configuration = new SpringSQLConfiguration(this.getDataSource(), this.externalFileManager);
+		SpringSQLConfiguration configuration = new SpringSQLConfiguration(this.getDataSource(), this.externalFileManager,this.enableImageCompression);
 		List<Class<?>> result = new ArrayList<Class<?>>();
 		if (getAnnotatedClasses() != null) {
 			result.addAll(Arrays.asList(getAnnotatedClasses()));
@@ -135,6 +136,14 @@ public class SpringSQLSessionFactoryBean implements FactoryBean<SQLSessionFactor
 
 	public void setExternalFileManager(ExternalFileManager externalFileManager) {
 		this.externalFileManager = externalFileManager;
+	}
+
+	public boolean isEnableImageCompression() {
+		return enableImageCompression;
+	}
+
+	public void setEnableImageCompression(boolean enableImageCompression) {
+		this.enableImageCompression = enableImageCompression;
 	}
 
 }

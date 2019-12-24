@@ -28,6 +28,7 @@ public class SQLSessionFactoryConfiguration {
 	private Boolean useBeanValidation = true;
 	private ExternalFileManager externalFileManager;
 	private Map<Object, Class<?>> entityListeners = new LinkedHashMap<>();
+	private boolean enableImageCompression;
 
 	private SQLSessionFactoryConfiguration() {
 
@@ -188,6 +189,15 @@ public class SQLSessionFactoryConfiguration {
 
 	public Map<Object, Class<?>> getEntityListeners() {
 		return entityListeners;
+	}
+
+	public SQLSessionFactoryConfiguration enableImageCompression() {
+		this.enableImageCompression = true;
+		return this;
+	}
+
+	public boolean isEnableImageCompression() {
+		return enableImageCompression;
 	}
 
 }
