@@ -4,12 +4,12 @@ import javax.sql.DataSource;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.vibur.dbcp.ViburDBCPDataSource;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import br.com.anteros.dbcp.AnterosDBCPConfig;
 import br.com.anteros.dbcp.AnterosDBCPDataSource;
-import br.com.anteros.persistence.metadata.annotation.EntityListeners;
 import br.com.anteros.persistence.session.SQLSessionFactory;
 import br.com.anteros.persistence.session.configuration.AnterosPersistenceProperties;
 import br.com.anteros.persistence.session.query.ShowSQLType;
@@ -29,7 +29,8 @@ public abstract class AbstractSQLPersistenceConfiguration {
 		if (sqlSessionFactoryConfiguration != null) {
 			DataSource dataSource = dataSourceSQL();
 			SpringSQLConfiguration configuration = new SpringSQLConfiguration(dataSource,
-					sqlSessionFactoryConfiguration.getExternalFileManager(), sqlSessionFactoryConfiguration.isEnableImageCompression());
+					sqlSessionFactoryConfiguration.getExternalFileManager(),
+					sqlSessionFactoryConfiguration.isEnableImageCompression());
 			for (Class<?> sourceClass : sqlSessionFactoryConfiguration.getEntitySourceClasses()) {
 				configuration.addAnnotatedClass(sourceClass);
 			}
@@ -87,6 +88,28 @@ public abstract class AbstractSQLPersistenceConfiguration {
 			config.setDataSourceProperties(pooledDataSourceConfiguration.getDataSourceProperties());
 			AnterosDBCPDataSource dataSource = new AnterosDBCPDataSource(config);
 			return dataSource;
+		} else if (getPooledDataSourceConfiguration() != null
+				&& getPooledDataSourceConfiguration() instanceof ViburDataSourceConfiguration) {
+			ViburDataSourceConfiguration pooledDataSourceConfiguration = (ViburDataSourceConfiguration) getPooledDataSourceConfiguration();
+			ViburDBCPDataSource ds = new ViburDBCPDataSource();
+
+			ds.setJdbcUrl(pooledDataSourceConfiguration.getJdbcUrl());
+			ds.setUsername(pooledDataSourceConfiguration.getUser());
+			ds.setPassword(pooledDataSourceConfiguration.getPassword());
+			ds.setDriverClassName(pooledDataSourceConfiguration.getDriverClass());
+
+			ds.setPoolInitialSize(Integer.valueOf(pooledDataSourceConfiguration.getMinPoolSize()));
+			ds.setPoolMaxSize(Integer.valueOf(pooledDataSourceConfiguration.getMaxPoolSize()));
+
+
+			ds.setLogQueryExecutionLongerThanMs(1000);
+			ds.setLogStackTraceForLongQueryExecution(true);
+
+
+			ds.setStatementCacheMaxSize(400);
+
+			ds.start();
+			return ds;
 		} else if (getPooledDataSourceConfiguration() != null) {
 			PooledDataSourceConfiguration pooledDataSourceConfiguration = getPooledDataSourceConfiguration();
 			ComboPooledDataSource dataSource = new ComboPooledDataSource();
