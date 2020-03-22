@@ -25,7 +25,7 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
-import br.com.anteros.persistence.session.ExternalFileManager;
+import br.com.anteros.cloud.integration.filesharing.CloudFileManager;
 import br.com.anteros.persistence.session.SQLSessionFactory;
 import br.com.anteros.persistence.session.configuration.PackageScanEntity;
 
@@ -43,7 +43,7 @@ public class SpringSQLSessionFactoryBean implements FactoryBean<SQLSessionFactor
 	protected DataSource dataSource;
 	protected String packageToScanEntity;
 	protected boolean includeSecurityModel = false;
-	protected ExternalFileManager externalFileManager;
+	protected CloudFileManager externalFileManager;
 	protected boolean enableImageCompression;
 
 	public void setAnnotatedClasses(Class<?>[] annotatedClasses) {
@@ -130,11 +130,11 @@ public class SpringSQLSessionFactoryBean implements FactoryBean<SQLSessionFactor
 		this.includeSecurityModel = includeSecurityModel;
 	}
 
-	public ExternalFileManager getExternalFileManager() {
+	public CloudFileManager getExternalFileManager() {
 		return externalFileManager;
 	}
 
-	public void setExternalFileManager(ExternalFileManager externalFileManager) {
+	public void setExternalFileManager(CloudFileManager externalFileManager) {
 		this.externalFileManager = externalFileManager;
 	}
 

@@ -17,8 +17,8 @@ package br.com.anteros.spring.transaction;
 
 import javax.sql.DataSource;
 
+import br.com.anteros.cloud.integration.filesharing.CloudFileManager;
 import br.com.anteros.persistence.metadata.configuration.PersistenceModelConfiguration;
-import br.com.anteros.persistence.session.ExternalFileManager;
 import br.com.anteros.persistence.session.SQLSessionFactory;
 import br.com.anteros.persistence.session.configuration.AnterosPersistenceConfiguration;
 
@@ -30,15 +30,15 @@ import br.com.anteros.persistence.session.configuration.AnterosPersistenceConfig
  */
 public class SpringSQLConfiguration extends AnterosPersistenceConfiguration {
 
-	public SpringSQLConfiguration(DataSource dataSource, ExternalFileManager externalFileManager, boolean enableImageCompression) {
+	public SpringSQLConfiguration(DataSource dataSource, CloudFileManager externalFileManager, boolean enableImageCompression) {
 		super(dataSource, externalFileManager,enableImageCompression);
 	}
 
-	public SpringSQLConfiguration(PersistenceModelConfiguration modelConfiguration, ExternalFileManager externalFileManager, boolean enableImageCompression) {
+	public SpringSQLConfiguration(PersistenceModelConfiguration modelConfiguration, CloudFileManager externalFileManager, boolean enableImageCompression) {
 		super(modelConfiguration, externalFileManager,enableImageCompression);
 	}
 
-	public SpringSQLConfiguration(DataSource dataSource, PersistenceModelConfiguration modelConfiguration, ExternalFileManager externalFileManager, boolean enableImageCompression) {
+	public SpringSQLConfiguration(DataSource dataSource, PersistenceModelConfiguration modelConfiguration, CloudFileManager externalFileManager, boolean enableImageCompression) {
 		super(dataSource, modelConfiguration, externalFileManager,enableImageCompression);
 	}
 

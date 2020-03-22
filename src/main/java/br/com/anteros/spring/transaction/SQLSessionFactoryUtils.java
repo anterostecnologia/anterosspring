@@ -133,7 +133,10 @@ public abstract class SQLSessionFactoryUtils {
 
 		Object resource = TransactionSynchronizationManager.getResource(sessionFactory);
 		if (resource instanceof SQLSession) {
-			return (SQLSession) resource;
+			SQLSession session = (SQLSession) resource;
+			if (!session.getConnection().isClosed() && session.getConnection().isValid(2000)) {
+				return session;
+			}
 		}
 		SQLSessionHolder sessionHolder = (SQLSessionHolder) resource;
 		if (sessionHolder != null && !sessionHolder.isEmpty()) {

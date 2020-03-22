@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import br.com.anteros.persistence.session.ExternalFileManager;
+import br.com.anteros.cloud.integration.filesharing.CloudFileManager;
 import br.com.anteros.persistence.session.configuration.PackageScanEntity;
 import br.com.anteros.persistence.session.query.ShowSQLType;
 
@@ -26,7 +26,7 @@ public class SQLSessionFactoryConfiguration {
 	private String dropTablesFileName = "";	
 	private Long lockTimeout = 0L;
 	private Boolean useBeanValidation = true;
-	private ExternalFileManager externalFileManager;
+	private CloudFileManager externalFileManager;
 	private Map<Object, Class<?>> entityListeners = new LinkedHashMap<>();
 	private boolean enableImageCompression;
 
@@ -178,11 +178,11 @@ public class SQLSessionFactoryConfiguration {
 		return this;
 	}
 
-	public ExternalFileManager getExternalFileManager() {
+	public CloudFileManager getExternalFileManager() {
 		return externalFileManager;
 	}
 
-	public SQLSessionFactoryConfiguration externalFileManager(ExternalFileManager externalFileManager) {
+	public SQLSessionFactoryConfiguration externalFileManager(CloudFileManager externalFileManager) {
 		this.externalFileManager = externalFileManager;
 		return this;
 	}
