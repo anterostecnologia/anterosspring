@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import br.com.anteros.persistence.dsl.osql.types.OrderSpecifier;
 import br.com.anteros.persistence.dsl.osql.types.Predicate;
 import br.com.anteros.persistence.session.SQLSessionFactory;
+import br.com.anteros.persistence.session.lock.LockOptions;
 import br.com.anteros.persistence.session.repository.Page;
 import br.com.anteros.persistence.session.repository.Pageable;
 import br.com.anteros.persistence.session.service.GenericSQLService;
@@ -221,6 +222,28 @@ public class SpringTransactionalSQLService<T, ID extends Serializable> extends G
 		return super.getTableName();
 	}
 
-	
+	@Override
+	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
+	public T findByCode(String code, String fieldsToForceLazy) {
+		return super.findByCode(code, fieldsToForceLazy);
+	}
+
+	@Override
+	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
+	public T findByCode(String code, boolean readOnly, String fieldsToForceLazy) {
+		return super.findByCode(code, readOnly, fieldsToForceLazy);
+	}
+
+	@Override
+	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
+	public T findByCode(String code, LockOptions lockOptions, String fieldsToForceLazy) {
+		return super.findByCode(code, lockOptions, fieldsToForceLazy);
+	}
+
+	@Override
+	@Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRED, readOnly = true)
+	public T findByCode(String code, LockOptions lockOptions, boolean readOnly, String fieldsToForceLazy) {
+		return super.findByCode(code, lockOptions, fieldsToForceLazy);
+	}
 
 }
