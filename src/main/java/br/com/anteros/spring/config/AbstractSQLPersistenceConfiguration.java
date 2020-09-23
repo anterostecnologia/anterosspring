@@ -8,8 +8,7 @@ import org.vibur.dbcp.ViburDBCPDataSource;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
-import br.com.anteros.dbcp.AnterosDBCPConfig;
-import br.com.anteros.dbcp.AnterosDBCPDataSource;
+
 import br.com.anteros.persistence.session.SQLSessionFactory;
 import br.com.anteros.persistence.session.configuration.AnterosPersistenceProperties;
 import br.com.anteros.persistence.session.query.ShowSQLType;
@@ -74,21 +73,6 @@ public abstract class AbstractSQLPersistenceConfiguration {
 	@Bean
 	public DataSource dataSourceSQL() throws Exception {
 		if (getPooledDataSourceConfiguration() != null
-				&& getPooledDataSourceConfiguration() instanceof AnterosDBCPDataSourceConfiguration) {
-			AnterosDBCPDataSourceConfiguration pooledDataSourceConfiguration = (AnterosDBCPDataSourceConfiguration) getPooledDataSourceConfiguration();
-			AnterosDBCPConfig config = new AnterosDBCPConfig();
-			config.setAutoCommit(false);
-			config.setDriverClassName(pooledDataSourceConfiguration.getDriverClass());
-			config.setJdbcUrl(pooledDataSourceConfiguration.getJdbcUrl());
-			config.setPassword(pooledDataSourceConfiguration.getPassword());
-			config.setUsername(pooledDataSourceConfiguration.getUser());
-			config.setMaximumPoolSize(Integer.valueOf(pooledDataSourceConfiguration.getMaxPoolSize()));
-			config.setConnectionTestQuery(pooledDataSourceConfiguration.getPreferredTestQuery());
-			config.setReadOnly(false);
-			config.setDataSourceProperties(pooledDataSourceConfiguration.getDataSourceProperties());
-			AnterosDBCPDataSource dataSource = new AnterosDBCPDataSource(config);
-			return dataSource;
-		} else if (getPooledDataSourceConfiguration() != null
 				&& getPooledDataSourceConfiguration() instanceof ViburDataSourceConfiguration) {
 			ViburDataSourceConfiguration pooledDataSourceConfiguration = (ViburDataSourceConfiguration) getPooledDataSourceConfiguration();
 			ViburDBCPDataSource ds = new ViburDBCPDataSource();
