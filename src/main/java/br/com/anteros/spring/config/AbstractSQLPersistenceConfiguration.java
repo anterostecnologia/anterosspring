@@ -84,11 +84,13 @@ public abstract class AbstractSQLPersistenceConfiguration {
 
 			ds.setPoolInitialSize(Integer.valueOf(pooledDataSourceConfiguration.getMinPoolSize()));
 			ds.setPoolMaxSize(Integer.valueOf(pooledDataSourceConfiguration.getMaxPoolSize()));
+			ds.setConnectionIdleLimitInSeconds(pooledDataSourceConfiguration.getConnectionIdleLimitInSeconds());
+			ds.setTestConnectionQuery(pooledDataSourceConfiguration.getTestConnectionQuery());
 
-
-			ds.setLogQueryExecutionLongerThanMs(1000);
+			ds.setLogQueryExecutionLongerThanMs(2000);
 			ds.setLogStackTraceForLongQueryExecution(true);
-
+			ds.setLogLargeResultSet(300);
+			ds.setLogStackTraceForLongConnection(true);
 
 			ds.setStatementCacheMaxSize(400);
 

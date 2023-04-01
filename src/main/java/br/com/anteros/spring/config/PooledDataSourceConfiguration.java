@@ -47,6 +47,10 @@ public class PooledDataSourceConfiguration {
 	
 	private String automaticTestTable = "TST_CONNECTION";
 
+	private int connectionIdleLimitInSeconds = 5;
+
+	private String testConnectionQuery = "isValid";
+
 	public String getDriverClass() {
 		return driverClass;
 	}
@@ -192,4 +196,21 @@ public class PooledDataSourceConfiguration {
 		return this;
 	}
 
+	public int getConnectionIdleLimitInSeconds() {
+		return connectionIdleLimitInSeconds;
+	}
+
+	public PooledDataSourceConfiguration connectionIdleLimitInSeconds(int connectionIdleLimitInSeconds) {
+		this.connectionIdleLimitInSeconds = connectionIdleLimitInSeconds;
+		return this;
+	}
+
+	public String getTestConnectionQuery() {
+		return testConnectionQuery;
+	}
+
+	public PooledDataSourceConfiguration testConnectionQuery(String testConnectionQuery) {
+		this.testConnectionQuery = testConnectionQuery;
+		return this;
+	}
 }
